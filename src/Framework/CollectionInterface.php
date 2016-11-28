@@ -27,6 +27,15 @@ interface CollectionInterface {
 	public function append( $item );
 	
 	/**
+	 * The at method returns the item at a given index in the collection
+	 *
+	 * @param int $index
+	 *
+	 * @return array
+	 */
+	public function at( $index );
+	
+	/**
 	 * The chunk method breaks the collection into multiple, smaller collections of a given size
 	 *
 	 * @param $collectionSize
@@ -53,10 +62,11 @@ interface CollectionInterface {
 	 * The each method iterates over the items in the collection and passes each item to a callback
 	 *
 	 * @param \Closure $f
+	 * @param bool     $passByReference
 	 *
 	 * @return CollectionInterface
 	 */
-	public function each( \Closure $f );
+	public function each( \Closure $f, $passByReference = FALSE );
 	
 	/**
 	 * The filter method filters the collection using the given callback,

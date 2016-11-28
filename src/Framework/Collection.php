@@ -10,6 +10,28 @@ namespace Framework;
 
 class Collection implements CollectionInterface {
 	
+	protected $_data = [];
+	
+	/**
+	 * Collection constructor.
+	 *
+	 * @param array $data
+	 */
+	public function __construct( array $data = [] )
+	{
+		$this->_data = $data;
+	}
+	
+	/**
+	 * @param array $data
+	 *
+	 * @return static
+	 */
+	public static function instance( array $data = [] )
+	{
+		return new static( $data );
+	}
+	
 	/**
 	 * The all method returns the underlying array represented by the collection
 	 *
@@ -17,7 +39,7 @@ class Collection implements CollectionInterface {
 	 */
 	public function all()
 	{
-		// TODO: Implement all() method.
+		return $this->_data;
 	}
 	
 	/**
@@ -29,19 +51,52 @@ class Collection implements CollectionInterface {
 	 */
 	public function append( $item )
 	{
-		// TODO: Implement append() method.
+		array_push( $this->_data, $item );
+		
+		return $this;
+	}
+	
+	/**
+	 * The at method returns the item at a given index in the collection
+	 *
+	 * @param int $index
+	 *
+	 * @return array
+	 */
+	public function at( $index )
+	{
+		settype( $index, 'integer' );
+		
+		return isset( $this->_data[ $index ] ) ? $this->_data[ $index ] : NULL;
 	}
 	
 	/**
 	 * The chunk method breaks the collection into multiple, smaller collections of a given size
 	 *
-	 * @param $collectionSize
+	 * @param $chunkSize
 	 *
 	 * @return CollectionInterface
 	 */
-	public function chunk( $collectionSize )
+	public function chunk( $chunkSize )
 	{
-		// TODO: Implement chunk() method.
+		settype( $chunkSize, 'integer' );
+		$newCollection = static::instance();
+		$chunk         = static::instance();
+		
+		for ( $i = 0; $i < $this->count(); $i++ )
+		{
+			$chunk->push( $this->at( $i ) );
+			
+			if ( ($i + 1) % $chunkSize === 0 )
+			{
+				$newCollection->push( $chunk );
+				$chunk = static::instance();
+			}
+		}
+		
+		if ( $newCollection->isEmpty() ) $newCollection->push( $chunk );
+		
+		return $newCollection;
 	}
 	
 	/**
@@ -61,19 +116,36 @@ class Collection implements CollectionInterface {
 	 */
 	public function count()
 	{
-		// TODO: Implement count() method.
+		return count( $this->_data );
 	}
 	
 	/**
-	 * The each method iterates over the items in the collection and passes each item to a callback
+	 * The each method iterates over the items in the collection and passes each item to a callback.
+	 * Return FALSE to exit the loop.
 	 *
 	 * @param \Closure $f
+	 * @param bool     $passByReference
 	 *
 	 * @return CollectionInterface
 	 */
-	public function each( \Closure $f )
+	public function each( \Closure $f, $passByReference = FALSE )
 	{
-		// TODO: Implement each() method.
+		if ( $passByReference )
+		{
+			foreach ( $this->all() as $index => &$item )
+			{
+				if ( $f( $item, $index ) === FALSE ) break;
+			}
+		}
+		else
+		{
+			foreach ( $this->all() as $index => $item )
+			{
+				if ( $f( $item, $index ) === FALSE ) break;
+			}
+		}
+		
+		return $this;
 	}
 	
 	/**
@@ -89,7 +161,14 @@ class Collection implements CollectionInterface {
 	 */
 	public function filter( \Closure $f )
 	{
-		// TODO: Implement filter() method.
+		$filtered = static::instance();
+		
+		foreach ( $this->all() as $index => $item )
+		{
+			if ( $f( $item, $index ) ) $filtered->push( $item );
+		}
+		
+		return $filtered;
 	}
 	
 	/**
@@ -128,7 +207,7 @@ class Collection implements CollectionInterface {
 	 */
 	public function isEmpty()
 	{
-		// TODO: Implement isEmpty() method.
+		return empty( $this->_data );
 	}
 	
 	/**
@@ -143,7 +222,14 @@ class Collection implements CollectionInterface {
 	 */
 	public function map( \Closure $f )
 	{
-		// TODO: Implement map() method.
+		$mapped = static::instance();
+		
+		foreach ( $this->all() as $index => $item )
+		{
+			$mapped->push( $f( $item, $index ) );
+		}
+		
+		return $mapped;
 	}
 	
 	/**
@@ -153,7 +239,7 @@ class Collection implements CollectionInterface {
 	 */
 	public function pop()
 	{
-		// TODO: Implement pop() method.
+		return array_pop( $this->_data );
 	}
 	
 	/**
@@ -165,7 +251,9 @@ class Collection implements CollectionInterface {
 	 */
 	public function prepend( $item )
 	{
-		// TODO: Implement prepend() method.
+		array_unshift( $this->_data, $item );
+		
+		return $this;
 	}
 	
 	/**
@@ -177,7 +265,9 @@ class Collection implements CollectionInterface {
 	 */
 	public function push( $item )
 	{
-		// TODO: Implement push() method.
+		array_push( $this->_data, $item );
+		
+		return $this;
 	}
 	
 	/**
@@ -194,7 +284,12 @@ class Collection implements CollectionInterface {
 	 */
 	public function reduce( \Closure $f, $carry = NULL )
 	{
-		// TODO: Implement reduce() method.
+		foreach ( $this->all() as $index => $item )
+		{
+			$carry = $f( $carry, $item, $index );
+		}
+		
+		return $carry;
 	}
 	
 	/**
@@ -209,7 +304,14 @@ class Collection implements CollectionInterface {
 	 */
 	public function reject( \Closure $f )
 	{
-		// TODO: Implement reject() method.
+		$filtered = static::instance();
+		
+		foreach ( $this->all() as $index => $item )
+		{
+			if ( ! $f( $item, $index ) ) $filtered->push( $item );
+		}
+		
+		return $filtered;
 	}
 	
 	/**
@@ -219,7 +321,9 @@ class Collection implements CollectionInterface {
 	 */
 	public function reverse()
 	{
-		// TODO: Implement reverse() method.
+		array_reverse( $this->_data );
+		
+		return $this;
 	}
 	
 	/**
@@ -229,7 +333,7 @@ class Collection implements CollectionInterface {
 	 */
 	public function shift()
 	{
-		// TODO: Implement shift() method.
+		return array_shift( $this->_data );
 	}
 	
 	/**

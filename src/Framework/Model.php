@@ -10,6 +10,7 @@ namespace Framework;
 
 use ArrayAccess;
 use Database\MySQL;
+use Framework\Exceptions\DirectAccessException;
 use IteratorAggregate;
 use JsonSerializable;
 use Traversable;
@@ -396,6 +397,24 @@ abstract class Model implements ModelInterface, IteratorAggregate, JsonSerializa
 	public function __toString()
 	{
 		return $this->toJson();
+	}
+	
+	public function __set( $prop, $value )
+	{
+		$className = static::getNamespace();
+		
+		throw new DirectAccessException(
+			"Cannot set property [{$prop} = {$value}] directly on {$className}. Use set method."
+		);
+	}
+	
+	public function __get( $prop )
+	{
+		$className = static::getNamespace();
+		
+		throw new DirectAccessException(
+			"Cannot access property [{$prop}] directly on {$className}. Use get method."
+		);
 	}
 	
 	/**
