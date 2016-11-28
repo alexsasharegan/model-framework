@@ -1,0 +1,21 @@
+{
+	"name": "alexsasharegan/model-framework",
+	"description": "Make getting started with data-driven apps easier by using some solid model classes and database abstractions",
+	"type": "library",
+	"require": {
+		"alexsasharegan/database": "^1.0",
+		"vlucas/phpdotenv": "^2.4"
+	},
+	"autoload": {
+		"psr-4" : {
+			"Framework\\" : "src/"
+		}
+	},
+	"license": "MIT",
+	"authors": [
+		{
+			"name": "Alex Regan",
+			"email": "alex.joseph.regan@gmail.com"
+		}
+	]
+}
