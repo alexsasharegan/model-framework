@@ -4,11 +4,14 @@
 	"type": "library",
 	"require": {
 		"alexsasharegan/database": "^1.0",
-		"vlucas/phpdotenv": "^2.4"
+		"vlucas/phpdotenv": "^2.4",
+		"league/flysystem": "^1.0",
+		"twig/twig": "^1.28",
+		"twig/extensions": "^1.4"
 	},
 	"autoload": {
-		"psr-4" : {
-			"Framework\\" : "src/"
+		"psr-4": {
+			"Framework\\": "src/Framework/"
 		}
 	},
 	"license": "MIT",

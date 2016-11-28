@@ -92,13 +92,20 @@ interface ModelInterface {
 	public function parseFloat( $float );
 	
 	/**
+	 * @param $price
+	 *
+	 * @return float
+	 */
+	public function parsePrice( $price );
+	
+	/**
 	 * Fetch a model from the database by id.
 	 *
 	 * @param $id
 	 *
 	 * @return static
 	 */
-	public function fetch( $id );
+	public static function fetch( $id );
 	
 	/**
 	 * Fetch a model from the database using a where clause.
@@ -108,7 +115,7 @@ interface ModelInterface {
 	 *
 	 * @return static
 	 */
-	public function fetchWhere( $whereClause );
+	public static function fetchWhere( $whereClause );
 	
 	/**
 	 * Fetches an array of models from the database using a supplied where clause.
@@ -117,7 +124,7 @@ interface ModelInterface {
 	 *
 	 * @return static[]
 	 */
-	public function fetchMany( $whereClause );
+	public static function fetchMany( $whereClause );
 	
 	/**
 	 * Inserts the model in the database and returns the insert id.
@@ -138,10 +145,20 @@ interface ModelInterface {
 	
 	/**
 	 * Delete a model from the database (requires id to be present).
-	 * If $softDelete is TRUE, updates the $softDeleteFieldName.
+	 * If $useSoftDeletes is TRUE, updates the $softDeleteFieldName.
 	 *
 	 * @return bool|static
 	 */
 	public function delete();
+	
+	/**
+	 * @return static
+	 */
+	public function softDelete();
+	
+	/**
+	 * @return static
+	 */
+	public static function instance();
 	
 }
