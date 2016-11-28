@@ -171,6 +171,11 @@ interface ModelInterface {
 	public function toJson();
 	
 	/**
+	 * @return array
+	 */
+	public function toArray();
+	
+	/**
 	 * @return ModelInterface
 	 */
 	public static function instance();

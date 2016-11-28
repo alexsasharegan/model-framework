@@ -8,7 +8,7 @@
 
 namespace Framework;
 
-class Collection implements CollectionInterface {
+class Collection implements CollectionInterface, \JsonSerializable {
 	
 	protected $_data = [];
 	
@@ -106,7 +106,21 @@ class Collection implements CollectionInterface {
 	 */
 	public function collapse()
 	{
-		// TODO: Implement collapse() method.
+		$newData = [];
+		
+		foreach ( $this->all() as $item )
+		{
+			if ( $item instanceof CollectionInterface )
+			{
+				$newData = array_merge( $newData, $item->collapse() );
+			}
+			else
+			{
+				$newData[] = $item;
+			}
+		}
+		
+		return static::instance( $newData );
 	}
 	
 	/**
@@ -184,7 +198,16 @@ class Collection implements CollectionInterface {
 	 */
 	public function forPage( $pageNumber, $itemsPerPage )
 	{
-		// TODO: Implement forPage() method.
+		settype( $pageNumber, 'integer' );
+		settype( $itemsPerPage, 'integer' );
+		
+		$numberOfPages = ceil( $this->count() / $itemsPerPage );
+		
+		if ( $pageNumber > $numberOfPages ) return static::instance();
+		
+		$startIndex = $pageNumber === 1 ? 0 : ($pageNumber - 1) * $itemsPerPage;
+		
+		return $this->slice( $startIndex, $itemsPerPage );
 	}
 	
 	/**
@@ -197,7 +220,12 @@ class Collection implements CollectionInterface {
 	 */
 	public function includes( \Closure $f )
 	{
-		// TODO: Implement includes() method.
+		foreach ( $this->all() as $index => $item )
+		{
+			if ( $f( $item, $index ) ) return TRUE;
+		}
+		
+		return FALSE;
 	}
 	
 	/**
@@ -344,9 +372,13 @@ class Collection implements CollectionInterface {
 	 *
 	 * @return CollectionInterface
 	 */
-	public function slice( $startIndex = 0, $length )
+	public function slice( $startIndex = 0, $length = NULL )
 	{
-		// TODO: Implement slice() method.
+		if ( ! is_null( $length ) ) settype( $length, 'integer' );
+		
+		settype( $startIndex, 'integer' );
+		
+		return static::instance( array_slice( $this->all(), $startIndex, $length ) );
 	}
 	
 	/**
@@ -358,19 +390,27 @@ class Collection implements CollectionInterface {
 	 */
 	public function sort( \Closure $f )
 	{
-		// TODO: Implement sort() method.
+		usort( $this->_data, $f );
+		
+		return $this;
 	}
 	
 	/**
-	 * The splice method removes and returns a slice of items starting at the specified index
+	 * The splice method removes a portion of the collection and replaces it with something else.
 	 *
-	 * @param int $spliceIndex
+	 * @param int        $spliceIndex
+	 * @param null|int   $length
+	 * @param null|array $replacement
 	 *
 	 * @return CollectionInterface
 	 */
-	public function splice( $spliceIndex )
+	public function splice( $spliceIndex, $length = NULL, $replacement = NULL )
 	{
-		// TODO: Implement splice() method.
+		if ( ! is_null( $length ) ) settype( $length, 'integer' );
+		
+		settype( $spliceIndex, 'integer' );
+		
+		return static::instance( array_splice( $this->all(), $spliceIndex, $length, $replacement ) );
 	}
 	
 	/**
@@ -382,21 +422,32 @@ class Collection implements CollectionInterface {
 	 */
 	public function toArray()
 	{
-		// TODO: Implement toArray() method.
+		return $this->map( function ( $item )
+		{
+			if ( $item instanceof ModelInterface ) return $item->toArray();
+			
+			elseif ( $item instanceof \JsonSerializable ) return $item->jsonSerialize();
+			
+			else return $item;
+			
+		} )->all();
 	}
 	
 	/**
 	 * The toJson method converts the collection into JSON
 	 *
+	 * @param int $options
+	 * @param int $depth
+	 *
 	 * @return string
 	 */
-	public function toJson()
+	public function toJson( $options = 0, $depth = 512 )
 	{
-		// TODO: Implement toJson() method.
+		return json_encode( $this->jsonSerialize(), $options, $depth );
 	}
 	
 	/**
-	 * The where method returns the where element in the collection that passes a given truth test
+	 * The where method returns a new collection of items that pass a given truth test
 	 *
 	 * @param \Closure $f
 	 *
@@ -404,6 +455,42 @@ class Collection implements CollectionInterface {
 	 */
 	public function where( \Closure $f )
 	{
-		// TODO: Implement where() method.
+		$newCollection = static::instance();
+		
+		foreach ( $this->all() as $index => $item )
+		{
+			if ( $f( $item, $index ) ) $newCollection->push( $item );
+		}
+		
+		return $newCollection;
+	}
+	
+	/**
+	 * Specify data which should be serialized to JSON
+	 * @link http://php.net/manual/en/jsonserializable.jsonserialize.php
+	 * @return mixed data which can be serialized by <b>json_encode</b>,
+	 * which is a value of any type other than a resource.
+	 * @since 5.4.0
+	 */
+	function jsonSerialize()
+	{
+		return $this->all();
+	}
+	
+	/**
+	 * The findWhere method returns the first item that passes a given truth test, or NULL
+	 *
+	 * @param \Closure $f
+	 *
+	 * @return mixed|null
+	 */
+	public function findWhere( \Closure $f )
+	{
+		foreach ( $this->all() as $index => $item )
+		{
+			if ( $f( $item, $index ) ) return $item;
+		}
+		
+		return NULL;
 	}
 }

@@ -208,13 +208,15 @@ interface CollectionInterface {
 	public function sort( \Closure $f );
 	
 	/**
-	 * The splice method removes and returns a slice of items starting at the specified index
+	 * The splice method removes a portion of the collection and replaces it with something else.
 	 *
-	 * @param int $spliceIndex
+	 * @param int        $spliceIndex
+	 * @param int|null   $length
+	 * @param array|null $replacement
 	 *
 	 * @return CollectionInterface
 	 */
-	public function splice( $spliceIndex );
+	public function splice( $spliceIndex, $length = NULL, $replacement = NULL );
 	
 	/**
 	 * The toArray method converts the collection into a plain PHP array.
@@ -233,12 +235,21 @@ interface CollectionInterface {
 	public function toJson();
 	
 	/**
-	 * The where method returns the where element in the collection that passes a given truth test
+	 * The where method returns a new collection of items that pass a given truth test
 	 *
 	 * @param \Closure $f
 	 *
 	 * @return CollectionInterface
 	 */
 	public function where( \Closure $f );
+	
+	/**
+	 * The findWhere method returns the first item that passes a given truth test, or NULL
+	 *
+	 * @param \Closure $f
+	 *
+	 * @return mixed
+	 */
+	public function findWhere( \Closure $f );
 	
 }

@@ -374,9 +374,14 @@ abstract class Model implements ModelInterface, IteratorAggregate, JsonSerializa
 	 * which is a value of any type other than a resource.
 	 * @since 5.4.0
 	 */
-	function jsonSerialize()
+	public function jsonSerialize()
 	{
 		return $this->_data;
+	}
+	
+	public function toArray()
+	{
+		return $this->jsonSerialize();
 	}
 	
 	/**
