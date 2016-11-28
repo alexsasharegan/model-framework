@@ -32,7 +32,7 @@ interface ModelInterface {
 	 * @param $prop
 	 * @param $value
 	 *
-	 * @return static
+	 * @return ModelInterface
 	 */
 	public function set( $prop, $value );
 	
@@ -41,16 +41,25 @@ interface ModelInterface {
 	 *
 	 * @param array $data
 	 *
-	 * @return static
+	 * @return ModelInterface
 	 */
 	public function setAll( array $data = [] );
+	
+	/**
+	 * Unset a property on the model.
+	 *
+	 * @param $prop
+	 *
+	 * @return ModelInterface
+	 */
+	public function remove( $prop );
 	
 	/**
 	 * Set an array of data on the model merging it with existing attributes.
 	 *
 	 * @param array $data
 	 *
-	 * @return static
+	 * @return ModelInterface
 	 */
 	public function mergeData( array $data );
 	
@@ -103,7 +112,7 @@ interface ModelInterface {
 	 *
 	 * @param $id
 	 *
-	 * @return static
+	 * @return ModelInterface
 	 */
 	public static function fetch( $id );
 	
@@ -113,7 +122,7 @@ interface ModelInterface {
 	 *
 	 * @param $whereClause
 	 *
-	 * @return static
+	 * @return ModelInterface
 	 */
 	public static function fetchWhere( $whereClause );
 	
@@ -122,7 +131,7 @@ interface ModelInterface {
 	 *
 	 * @param $whereClause
 	 *
-	 * @return static[]
+	 * @return ModelInterface[]
 	 */
 	public static function fetchMany( $whereClause );
 	
@@ -147,17 +156,22 @@ interface ModelInterface {
 	 * Delete a model from the database (requires id to be present).
 	 * If $useSoftDeletes is TRUE, updates the $softDeleteFieldName.
 	 *
-	 * @return bool|static
+	 * @return bool|ModelInterface
 	 */
 	public function delete();
 	
 	/**
-	 * @return static
+	 * @return ModelInterface
 	 */
 	public function softDelete();
 	
 	/**
-	 * @return static
+	 * @return string
+	 */
+	public function toJson();
+	
+	/**
+	 * @return ModelInterface
 	 */
 	public static function instance();
 	

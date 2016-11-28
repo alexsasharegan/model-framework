@@ -8,10 +8,13 @@
 
 namespace Framework;
 
+use ArrayAccess;
 use Database\MySQL;
+use IteratorAggregate;
+use JsonSerializable;
 use Traversable;
 
-abstract class Model implements ModelInterface, \JsonSerializable, \IteratorAggregate {
+abstract class Model implements ModelInterface, IteratorAggregate, JsonSerializable, ArrayAccess {
 	
 	const CAST_FROM_JSON_TO_ARRAY  = 'CAST_FROM_JSON_TO_ARRAY';
 	const CAST_FROM_JSON_TO_OBJECT = 'CAST_FROM_JSON_TO_OBJECT';
@@ -120,6 +123,18 @@ abstract class Model implements ModelInterface, \JsonSerializable, \IteratorAggr
 	}
 	
 	/**
+	 * @param $prop
+	 *
+	 * @return static
+	 */
+	public function remove( $prop )
+	{
+		unset( $this->_data[ $prop ] );
+		
+		return $this;
+	}
+	
+	/**
 	 * Set an array of data on the model merging it with existing attributes.
 	 *
 	 * @param array $data
@@ -131,6 +146,43 @@ abstract class Model implements ModelInterface, \JsonSerializable, \IteratorAggr
 		return $this->setAll(
 			array_merge( $this->getAll(), $data )
 		);
+	}
+	
+	/**
+	 * @param mixed $offset
+	 *
+	 * @return bool
+	 */
+	public function offsetExists( $offset )
+	{
+		return array_key_exists( $offset, $this->getAll() );
+	}
+	
+	/**
+	 * @param mixed $offset
+	 *
+	 * @return mixed
+	 */
+	public function offsetGet( $offset )
+	{
+		return $this->get( $offset );
+	}
+	
+	/**
+	 * @param mixed $offset
+	 * @param mixed $value
+	 */
+	public function offsetSet( $offset, $value )
+	{
+		$this->set( $offset, $value );
+	}
+	
+	/**
+	 * @param mixed $offset
+	 */
+	public function offsetUnset( $offset )
+	{
+		$this->remove( $offset );
 	}
 	
 	/**
@@ -342,6 +394,14 @@ abstract class Model implements ModelInterface, \JsonSerializable, \IteratorAggr
 	 * @return string
 	 */
 	public function __toString()
+	{
+		return $this->toJson();
+	}
+	
+	/**
+	 * @return string
+	 */
+	public function toJson()
 	{
 		return json_encode( $this );
 	}
