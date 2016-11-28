@@ -399,11 +399,14 @@ abstract class Model implements ModelInterface, IteratorAggregate, JsonSerializa
 	}
 	
 	/**
+	 * @param int $options
+	 * @param int $depth
+	 *
 	 * @return string
 	 */
-	public function toJson()
+	public function toJson( $options = 0, $depth = 512 )
 	{
-		return json_encode( $this );
+		return json_encode( $this, $options, $depth );
 	}
 	
 	/**
