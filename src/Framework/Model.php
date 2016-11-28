@@ -145,22 +145,22 @@ abstract class Model implements ModelInterface, \JsonSerializable, \IteratorAggr
 		
 		switch ( $this->casts[ $prop ] )
 		{
-			case self::CAST_FROM_JSON_TO_ARRAY:
+			case static::CAST_FROM_JSON_TO_ARRAY:
 				return $this->parseJSON( $value, TRUE );
 			
-			case self::CAST_FROM_JSON_TO_OBJECT:
+			case static::CAST_FROM_JSON_TO_OBJECT:
 				return $this->parseJSON( $value, FALSE );
 			
-			case self::CAST_TO_BOOL:
+			case static::CAST_TO_BOOL:
 				return $this->parseBool( $value );
 			
-			case self::CAST_TO_FLOAT:
+			case static::CAST_TO_FLOAT:
 				return $this->parseFloat( $value );
 			
-			case self::CAST_TO_PRICE:
+			case static::CAST_TO_PRICE:
 				return $this->parsePrice( $value );
 			
-			case self::CAST_TO_INT:
+			case static::CAST_TO_INT:
 				return $this->parseInt( $value );
 			
 			default:
