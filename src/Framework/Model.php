@@ -48,10 +48,10 @@ abstract class Model implements ModelInterface, IteratorAggregate, JsonSerializa
 	/*
 	 * Define with name of createdAt timestamp field
 	 */
-	protected $createdAtField = 'created';
+	protected $timestampFieldName = 'created';
 	
 	/*
-	 * If true, enforces the $createdAtField has a value when calling create()
+	 * If true, enforces the $timestampFieldName has a value when calling create()
 	 */
 	protected $timestamp = TRUE;
 	
@@ -300,9 +300,9 @@ abstract class Model implements ModelInterface, IteratorAggregate, JsonSerializa
 	 */
 	public function create()
 	{
-		if ( $this->timestamp && empty( $this->get( $this->createdAtField ) ) )
+		if ( $this->timestamp && empty( $this->get( $this->timestampFieldName ) ) )
 		{
-			$this->set( $this->createdAtField, MySQL::now() );
+			$this->set( $this->timestampFieldName, MySQL::now() );
 		}
 		
 		$this->set(
@@ -434,6 +434,22 @@ abstract class Model implements ModelInterface, IteratorAggregate, JsonSerializa
 	}
 	
 	/**
+	 * @return string
+	 */
+	public function getClass()
+	{
+		return static::getNamespace();
+	}
+	
+	/**
+	 * @return string
+	 */
+	public function getFullyQualifiedClass()
+	{
+		return static::getFullyQualifiedNamespace();
+	}
+	
+	/**
 	 * @return static
 	 */
 	public static function instance()
@@ -454,7 +470,7 @@ abstract class Model implements ModelInterface, IteratorAggregate, JsonSerializa
 		
 		Container::db()
 		         ->select( static::TABLE, (int) $id )
-		         ->iterateResult( function ( $carry, array $modelData ) use ( $instance )
+		         ->iterateResult( function ( array $modelData ) use ( $instance )
 		         {
 			         $instance->setAll( $modelData );
 		         } );
