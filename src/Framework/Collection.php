@@ -8,7 +8,9 @@
 
 namespace Framework;
 
-class Collection implements CollectionInterface, \JsonSerializable {
+use Traversable;
+
+class Collection implements CollectionInterface, \JsonSerializable, \ArrayAccess, \IteratorAggregate, \Countable {
 	
 	protected $_data = [];
 	
@@ -179,7 +181,7 @@ class Collection implements CollectionInterface, \JsonSerializable {
 		
 		foreach ( $this->all() as $index => $item )
 		{
-			if ( $f( $item, $index ) ) $filtered->push( $item );
+			if ( $f( $item, $index ) ) $filtered->set( $index, $item );
 		}
 		
 		return $filtered;
@@ -208,6 +210,18 @@ class Collection implements CollectionInterface, \JsonSerializable {
 		$startIndex = $pageNumber <= 1 ? 0 : ($pageNumber - 1) * $itemsPerPage;
 		
 		return $this->slice( $startIndex, $itemsPerPage );
+	}
+	
+	/**
+	 * Gets a value from the collection by a given key.
+	 *
+	 * @param $key
+	 *
+	 * @return mixed
+	 */
+	public function get( $key )
+	{
+		return isset( $this->_data[ $key ] ) ? $this->_data[ $key ] : NULL;
 	}
 	
 	/**
@@ -254,7 +268,7 @@ class Collection implements CollectionInterface, \JsonSerializable {
 		
 		foreach ( $this->all() as $index => $item )
 		{
-			$mapped->push( $f( $item, $index ) );
+			$mapped->set( $index, $f( $item, $index ) );
 		}
 		
 		return $mapped;
@@ -332,14 +346,28 @@ class Collection implements CollectionInterface, \JsonSerializable {
 	 */
 	public function reject( \Closure $f )
 	{
-		$filtered = static::instance();
+		$rejected = static::instance();
 		
 		foreach ( $this->all() as $index => $item )
 		{
-			if ( ! $f( $item, $index ) ) $filtered->push( $item );
+			if ( ! $f( $item, $index ) ) $rejected->set( $index, $item );
 		}
 		
-		return $filtered;
+		return $rejected;
+	}
+	
+	/**
+	 * Removes an item from the collection at a given key
+	 *
+	 * @param $key
+	 *
+	 * @return CollectionInterface
+	 */
+	public function remove( $key )
+	{
+		unset( $this->_data[ $key ] );
+		
+		return $this;
 	}
 	
 	/**
@@ -350,6 +378,21 @@ class Collection implements CollectionInterface, \JsonSerializable {
 	public function reverse()
 	{
 		return static::instance( array_reverse( $this->all() ) );
+	}
+	
+	/**
+	 * The set method sets a value by a given key on the collection
+	 *
+	 * @param $key
+	 * @param $value
+	 *
+	 * @return CollectionInterface
+	 */
+	public function set( $key, $value )
+	{
+		$this->_data[ $key ] = $value;
+		
+		return $this;
 	}
 	
 	/**
@@ -424,7 +467,7 @@ class Collection implements CollectionInterface, \JsonSerializable {
 	 */
 	public function toArray()
 	{
-		return $this->map( function ( $item )
+		return $this->map( function ( $item, $index )
 		{
 			if ( $item instanceof ModelInterface ) return $item->toArray();
 			
@@ -461,7 +504,7 @@ class Collection implements CollectionInterface, \JsonSerializable {
 		
 		foreach ( $this->all() as $index => $item )
 		{
-			if ( $f( $item, $index ) ) $newCollection->push( $item );
+			if ( $f( $item, $index ) ) $newCollection->set( $index, $item );
 		}
 		
 		return $newCollection;
@@ -494,5 +537,87 @@ class Collection implements CollectionInterface, \JsonSerializable {
 		}
 		
 		return NULL;
+	}
+	
+	/**
+	 * Whether a offset exists
+	 * @link http://php.net/manual/en/arrayaccess.offsetexists.php
+	 *
+	 * @param mixed $offset <p>
+	 * An offset to check for.
+	 * </p>
+	 *
+	 * @return boolean true on success or false on failure.
+	 * </p>
+	 * <p>
+	 * The return value will be casted to boolean if non-boolean was returned.
+	 * @since 5.0.0
+	 */
+	public function offsetExists( $offset )
+	{
+		return array_key_exists( $offset, $this->_data );
+	}
+	
+	/**
+	 * Offset to retrieve
+	 * @link http://php.net/manual/en/arrayaccess.offsetget.php
+	 *
+	 * @param mixed $offset <p>
+	 * The offset to retrieve.
+	 * </p>
+	 *
+	 * @return mixed Can return all value types.
+	 * @since 5.0.0
+	 */
+	public function offsetGet( $offset )
+	{
+		return $this->get( $offset );
+	}
+	
+	/**
+	 * Offset to set
+	 * @link http://php.net/manual/en/arrayaccess.offsetset.php
+	 *
+	 * @param mixed $offset <p>
+	 * The offset to assign the value to.
+	 * </p>
+	 * @param mixed $value <p>
+	 * The value to set.
+	 * </p>
+	 *
+	 * @return void
+	 * @since 5.0.0
+	 */
+	public function offsetSet( $offset, $value )
+	{
+		$this->set( $offset, $value );
+	}
+	
+	/**
+	 * Offset to unset
+	 * @link http://php.net/manual/en/arrayaccess.offsetunset.php
+	 *
+	 * @param mixed $offset <p>
+	 * The offset to unset.
+	 * </p>
+	 *
+	 * @return void
+	 * @since 5.0.0
+	 */
+	public function offsetUnset( $offset )
+	{
+		$this->remove( $offset );
+	}
+	
+	/**
+	 * Retrieve an external iterator
+	 * @link http://php.net/manual/en/iteratoraggregate.getiterator.php
+	 * @return Traversable An instance of an object implementing <b>Iterator</b> or
+	 * <b>Traversable</b>
+	 * @since 5.0.0
+	 */
+	public function getIterator()
+	{
+		return new \ArrayIterator( $this->all() );
 	}
 }

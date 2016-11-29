@@ -15,7 +15,7 @@ use IteratorAggregate;
 use JsonSerializable;
 use Traversable;
 
-abstract class Model implements ModelInterface, IteratorAggregate, JsonSerializable, ArrayAccess {
+abstract class Model implements ModelInterface, IteratorAggregate, JsonSerializable, ArrayAccess, \Countable {
 	
 	const CAST_FROM_JSON_TO_ARRAY  = 'CAST_FROM_JSON_TO_ARRAY';
 	const CAST_FROM_JSON_TO_OBJECT = 'CAST_FROM_JSON_TO_OBJECT';
@@ -63,11 +63,20 @@ abstract class Model implements ModelInterface, IteratorAggregate, JsonSerializa
 		'id' => self::CAST_TO_INT,
 	];
 	
-	protected $mySQL;
-	
-	public function __construct()
+	/**
+	 * Model constructor.
+	 *
+	 * @param array $data
+	 */
+	public function __construct( array $data = [] )
 	{
-		$this->mySQL = Container::db();
+		// The container connects only to a MySQL database,
+		// so we can be sure this field should be cast to an integer,
+		// but we'll leave this flexible to be overwritten in an extended class
+		$this->casts = array_merge( [ 'id' => static::CAST_TO_INT, ], $this->casts );
+		
+		// Initialize the data on the model
+		$this->setAll( $data );
 	}
 	
 	/**
@@ -147,6 +156,26 @@ abstract class Model implements ModelInterface, IteratorAggregate, JsonSerializa
 		return $this->setAll(
 			array_merge( $this->getAll(), $data )
 		);
+	}
+	
+	public function removePropsNotInDatabase()
+	{
+		$databaseProps = static::fetchDatabaseFields();
+		
+		return $this->setAll(
+			Collection::instance( $this->getAll() )->filter( function ( $value, $prop ) use ( $databaseProps )
+			{
+				return in_array( $prop, $databaseProps );
+			} )->toArray()
+		);
+	}
+	
+	/**
+	 * @return int
+	 */
+	public function count()
+	{
+		return count( $this->getAll() );
 	}
 	
 	/**
@@ -308,7 +337,7 @@ abstract class Model implements ModelInterface, IteratorAggregate, JsonSerializa
 		$this->set(
 			'id',
 			$this->parseInt(
-				$this->mySQL->insert( static::TABLE, $this->getAll(), TRUE )
+				Container::db()->insert( static::TABLE, $this->getAll(), TRUE )
 			)
 		);
 		
@@ -325,7 +354,7 @@ abstract class Model implements ModelInterface, IteratorAggregate, JsonSerializa
 	{
 		if ( $id = $this->parseInt( $this->get( 'id' ) ) )
 		{
-			$this->mySQL->update( static::TABLE, $this->getAll(), $id );
+			Container::db()->update( static::TABLE, $this->getAll(), $id );
 			
 			return $id;
 		}
@@ -339,14 +368,14 @@ abstract class Model implements ModelInterface, IteratorAggregate, JsonSerializa
 	 * Delete a model from the database (requires id to be present).
 	 * If $useSoftDeletes is TRUE, updates the $softDeleteFieldName.
 	 *
-	 * @return bool|Model
+	 * @return bool|ModelInterface
 	 */
 	public function delete()
 	{
 		if ( $this->useSoftDeletes ) return $this->softDelete();
 		
 		return $this->parseBool(
-			$this->mySQL->delete(
+			Container::db()->delete(
 				static::TABLE,
 				$this->parseInt( $this->get( 'id' ) )
 			)
@@ -358,7 +387,7 @@ abstract class Model implements ModelInterface, IteratorAggregate, JsonSerializa
 	 */
 	public function softDelete()
 	{
-		$this->mySQL->update(
+		Container::db()->update(
 			static::TABLE,
 			[ $this->softDeleteFieldName => TRUE ],
 			$this->parseInt( $this->get( 'id' ) )
@@ -382,6 +411,33 @@ abstract class Model implements ModelInterface, IteratorAggregate, JsonSerializa
 	public function toArray()
 	{
 		return $this->jsonSerialize();
+	}
+	
+	/**
+	 * @param int $options
+	 * @param int $depth
+	 *
+	 * @return string
+	 */
+	public function toJson( $options = 0, $depth = 512 )
+	{
+		return json_encode( $this, $options, $depth );
+	}
+	
+	/**
+	 * @return string
+	 */
+	public function getClass()
+	{
+		return static::getNamespace();
+	}
+	
+	/**
+	 * @return string
+	 */
+	public function getFullyQualifiedClass()
+	{
+		return static::getFullyQualifiedNamespace();
 	}
 	
 	/**
@@ -423,38 +479,23 @@ abstract class Model implements ModelInterface, IteratorAggregate, JsonSerializa
 	}
 	
 	/**
-	 * @param int $options
-	 * @param int $depth
+	 * @param array $data
 	 *
-	 * @return string
-	 */
-	public function toJson( $options = 0, $depth = 512 )
-	{
-		return json_encode( $this, $options, $depth );
-	}
-	
-	/**
-	 * @return string
-	 */
-	public function getClass()
-	{
-		return static::getNamespace();
-	}
-	
-	/**
-	 * @return string
-	 */
-	public function getFullyQualifiedClass()
-	{
-		return static::getFullyQualifiedNamespace();
-	}
-	
-	/**
 	 * @return static
 	 */
-	public static function instance()
+	public static function instance( array $data = [] )
 	{
-		return new static;
+		return new static( $data );
+	}
+	
+	/**
+	 * Returns an array of field names from the connected database.
+	 *
+	 * @return array
+	 */
+	public static function fetchDatabaseFields()
+	{
+		return Container::db()->getColumns( static::TABLE );
 	}
 	
 	/**
@@ -509,14 +550,15 @@ abstract class Model implements ModelInterface, IteratorAggregate, JsonSerializa
 	 */
 	public static function fetchMany( $whereClause = '' )
 	{
-		return Collection::instance(
-			Container::db()
-			         ->select( static::TABLE, [ '*' ], $whereClause )
-			         ->mapResult( function ( array $modelData )
-			         {
-				         return static::instance()->setAll( $modelData );
-			         } )
-		);
+		return
+			Collection::instance(
+				Container::db()
+				         ->select( static::TABLE, [ '*' ], $whereClause )
+				         ->mapResult( function ( array $modelData )
+				         {
+					         return static::instance( $modelData );
+				         } )
+			);
 	}
 	
 	/**

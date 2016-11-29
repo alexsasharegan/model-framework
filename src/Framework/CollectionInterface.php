@@ -95,6 +95,15 @@ interface CollectionInterface {
 	public function forPage( $pageNumber, $itemsPerPage );
 	
 	/**
+	 * Gets a value from the collection by a given key.
+	 *
+	 * @param $key
+	 *
+	 * @return mixed
+	 */
+	public function get( $key );
+	
+	/**
 	 * The includes method passes each item in the collection to a callback
 	 * and returns true at the first item that returns true from the callback, or false
 	 *
@@ -175,11 +184,29 @@ interface CollectionInterface {
 	public function reject( \Closure $f );
 	
 	/**
+	 * Removes an item from the collection at a given key
+	 *
+	 * @param $key
+	 *
+	 * @return CollectionInterface
+	 */
+	public function remove( $key );
+	
+	/**
 	 * The reverse method reverses the order of the collection's items
 	 *
 	 * @return CollectionInterface
 	 */
 	public function reverse();
+	
+	/**
+	 * The set method sets a value by a given key on the collection
+	 * @param $key
+	 * @param $value
+	 *
+	 * @return CollectionInterface
+	 */
+	public function set( $key, $value );
 	
 	/**
 	 * The shift method removes and returns the first item from the collection
