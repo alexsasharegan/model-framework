@@ -64,6 +64,13 @@ interface ModelInterface {
 	public function mergeData( array $data );
 	
 	/**
+	 * Returns whether or not any data is set on the model
+	 *
+	 * @return bool
+	 */
+	public function isEmpty();
+	
+	/**
 	 * @param $prop
 	 * @param $value
 	 *

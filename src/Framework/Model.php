@@ -158,6 +158,16 @@ abstract class Model implements ModelInterface, IteratorAggregate, JsonSerializa
 		);
 	}
 	
+	/**
+	 * Returns whether or not any data is set on the model
+	 *
+	 * @return bool
+	 */
+	public function isEmpty()
+	{
+		return empty( $this->getAll() );
+	}
+	
 	public function removePropsNotInDatabase()
 	{
 		$databaseProps = static::fetchDatabaseFields();
@@ -405,7 +415,7 @@ abstract class Model implements ModelInterface, IteratorAggregate, JsonSerializa
 	 */
 	public function jsonSerialize()
 	{
-		return $this->_data;
+		return $this->getAll();
 	}
 	
 	public function toArray()
