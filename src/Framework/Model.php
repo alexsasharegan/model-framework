@@ -505,17 +505,18 @@ abstract class Model implements ModelInterface, IteratorAggregate, JsonSerializa
 	 *
 	 * @param $whereClause
 	 *
-	 * @return static[]
+	 * @return CollectionInterface[static]
 	 */
-	public static function fetchMany( $whereClause )
+	public static function fetchMany( $whereClause = '' )
 	{
-		return
+		return Collection::instance(
 			Container::db()
 			         ->select( static::TABLE, [ '*' ], $whereClause )
 			         ->mapResult( function ( array $modelData )
 			         {
 				         return static::instance()->setAll( $modelData );
-			         } );
+			         } )
+		);
 	}
 	
 	/**

@@ -94,7 +94,7 @@ class Collection implements CollectionInterface, \JsonSerializable {
 			}
 		}
 		
-		if ( $newCollection->isEmpty() ) $newCollection->push( $chunk );
+		if ( ! $chunk->isEmpty() ) $newCollection->push( $chunk );
 		
 		return $newCollection;
 	}
@@ -112,7 +112,7 @@ class Collection implements CollectionInterface, \JsonSerializable {
 		{
 			if ( $item instanceof CollectionInterface )
 			{
-				$newData = array_merge( $newData, $item->collapse() );
+				$newData = array_merge( $newData, $item->collapse()->all() );
 			}
 			else
 			{
@@ -205,7 +205,7 @@ class Collection implements CollectionInterface, \JsonSerializable {
 		
 		if ( $pageNumber > $numberOfPages ) return static::instance();
 		
-		$startIndex = $pageNumber === 1 ? 0 : ($pageNumber - 1) * $itemsPerPage;
+		$startIndex = $pageNumber <= 1 ? 0 : ($pageNumber - 1) * $itemsPerPage;
 		
 		return $this->slice( $startIndex, $itemsPerPage );
 	}
@@ -349,9 +349,7 @@ class Collection implements CollectionInterface, \JsonSerializable {
 	 */
 	public function reverse()
 	{
-		array_reverse( $this->_data );
-		
-		return $this;
+		return static::instance( array_reverse( $this->all() ) );
 	}
 	
 	/**
@@ -410,7 +408,11 @@ class Collection implements CollectionInterface, \JsonSerializable {
 		
 		settype( $spliceIndex, 'integer' );
 		
-		return static::instance( array_splice( $this->all(), $spliceIndex, $length, $replacement ) );
+		$inputArray = $this->all();
+		
+		array_splice( $inputArray, $spliceIndex, $length, $replacement );
+		
+		return static::instance( $inputArray );
 	}
 	
 	/**
