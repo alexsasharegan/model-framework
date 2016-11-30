@@ -473,6 +473,8 @@ class Collection implements CollectionInterface, \JsonSerializable, \ArrayAccess
 			
 			elseif ( $item instanceof \JsonSerializable ) return $item->jsonSerialize();
 			
+			elseif ( $item instanceof CollectionInterface ) return $item->toArray();
+			
 			else return $item;
 			
 		} )->all();
@@ -519,7 +521,7 @@ class Collection implements CollectionInterface, \JsonSerializable, \ArrayAccess
 	 */
 	function jsonSerialize()
 	{
-		return $this->all();
+		return $this->toArray();
 	}
 	
 	/**
