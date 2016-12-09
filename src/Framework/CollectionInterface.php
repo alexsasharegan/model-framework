@@ -201,6 +201,7 @@ interface CollectionInterface {
 	
 	/**
 	 * The set method sets a value by a given key on the collection
+	 *
 	 * @param $key
 	 * @param $value
 	 *
@@ -257,9 +258,12 @@ interface CollectionInterface {
 	/**
 	 * The toJson method converts the collection into JSON
 	 *
+	 * @param int $options
+	 * @param int $depth
+	 *
 	 * @return string
 	 */
-	public function toJson();
+	public function toJson( $options = 0, $depth = 512 );
 	
 	/**
 	 * The where method returns a new collection of items that pass a given truth test

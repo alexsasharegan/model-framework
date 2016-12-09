@@ -173,9 +173,12 @@ interface ModelInterface {
 	public function softDelete();
 	
 	/**
+	 * @param int $options
+	 * @param int $depth
+	 *
 	 * @return string
 	 */
-	public function toJson();
+	public function toJson( $options = 0, $depth = 512 );
 	
 	/**
 	 * @return array
