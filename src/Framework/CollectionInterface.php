@@ -59,7 +59,8 @@ interface CollectionInterface {
 	public function count();
 	
 	/**
-	 * The each method iterates over the items in the collection and passes each item to a callback
+	 * The each method iterates over the items in the collection and passes each item to a callback.
+	 * Return FALSE to exit the loop.
 	 *
 	 * @param \Closure $f
 	 * @param bool     $passByReference
