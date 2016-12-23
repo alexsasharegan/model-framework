@@ -11,6 +11,15 @@ namespace Framework;
 interface CollectionInterface {
 	
 	/**
+	 * The add method appends an item to the end of the collection
+	 *
+	 * @param $item
+	 *
+	 * @return CollectionInterface
+	 */
+	public function add( $item );
+	
+	/**
 	 * The all method returns the underlying array represented by the collection
 	 *
 	 * @return array
@@ -120,6 +129,13 @@ interface CollectionInterface {
 	 * @return bool
 	 */
 	public function isEmpty();
+	
+	/**
+	 * @param $separator
+	 *
+	 * @return CollectionInterface
+	 */
+	public function join( $separator );
 	
 	/**
 	 * The map method iterates through the collection

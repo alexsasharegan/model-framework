@@ -622,4 +622,26 @@ class Collection implements CollectionInterface, \JsonSerializable, \ArrayAccess
 	{
 		return new \ArrayIterator( $this->all() );
 	}
+	
+	/**
+	 * The add method appends an item to the end of the collection
+	 *
+	 * @param $item
+	 *
+	 * @return CollectionInterface
+	 */
+	public function add( $item )
+	{
+		return $this->push( $item );
+	}
+	
+	/**
+	 * @param $separator
+	 *
+	 * @return CollectionInterface
+	 */
+	public function join( $separator )
+	{
+		return implode( $separator, $this->toArray() );
+	}
 }
