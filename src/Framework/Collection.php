@@ -638,7 +638,7 @@ class Collection implements CollectionInterface, \JsonSerializable, \ArrayAccess
 	/**
 	 * @param $separator
 	 *
-	 * @return CollectionInterface
+	 * @return string
 	 */
 	public function join( $separator )
 	{

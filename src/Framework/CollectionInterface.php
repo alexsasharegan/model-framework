@@ -133,7 +133,7 @@ interface CollectionInterface {
 	/**
 	 * @param $separator
 	 *
-	 * @return CollectionInterface
+	 * @return string
 	 */
 	public function join( $separator );
 	
