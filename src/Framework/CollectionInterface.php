@@ -92,6 +92,13 @@ interface CollectionInterface {
 	public function filter( \Closure $f );
 	
 	/**
+	 * Returns the first item in the underlying array.
+	 *
+	 * @return mixed
+	 */
+	public function first();
+	
+	/**
 	 * The forPage method returns a new collection containing the items
 	 * that would be present on a given page number.
 	 * The method accepts the page number as its first argument
@@ -136,6 +143,12 @@ interface CollectionInterface {
 	 * @return string
 	 */
 	public function join( $separator );
+	
+	/**
+	 * Returns the first item in the underlying array.
+	 * @return mixed
+	 */
+	public function last();
 	
 	/**
 	 * The map method iterates through the collection

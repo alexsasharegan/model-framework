@@ -188,6 +188,16 @@ class Collection implements CollectionInterface, \JsonSerializable, \ArrayAccess
 	}
 	
 	/**
+	 * @inheritdoc
+	 */
+	public function first()
+	{
+		$data = $this->all();
+		
+		return reset( $data );
+	}
+	
+	/**
 	 * The forPage method returns a new collection containing the items
 	 * that would be present on a given page number.
 	 * The method accepts the page number as its first argument
@@ -250,6 +260,16 @@ class Collection implements CollectionInterface, \JsonSerializable, \ArrayAccess
 	public function isEmpty()
 	{
 		return empty( $this->_data );
+	}
+	
+	/**
+	 * @inheritdoc
+	 */
+	public function last()
+	{
+		$data = $this->all();
+		
+		return end( $data );
 	}
 	
 	/**
