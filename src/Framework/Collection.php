@@ -10,8 +10,15 @@ namespace Framework;
 
 use Traversable;
 
+/**
+ * Class Collection
+ * @package Framework
+ */
 class Collection implements CollectionInterface, \JsonSerializable, \ArrayAccess, \IteratorAggregate, \Countable {
 	
+	/**
+	 * @var array
+	 */
 	protected $_data = [];
 	
 	/**

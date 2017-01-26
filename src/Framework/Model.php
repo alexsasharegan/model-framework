@@ -15,6 +15,10 @@ use IteratorAggregate;
 use JsonSerializable;
 use Traversable;
 
+/**
+ * Class Model
+ * @package Framework
+ */
 abstract class Model implements ModelInterface, IteratorAggregate, JsonSerializable, ArrayAccess, \Countable {
 	
 	const CAST_FROM_JSON_TO_ARRAY  = 'CAST_FROM_JSON_TO_ARRAY';
@@ -24,40 +28,46 @@ abstract class Model implements ModelInterface, IteratorAggregate, JsonSerializa
 	const CAST_TO_PRICE            = 'CAST_TO_PRICE';
 	const CAST_TO_BOOL             = 'CAST_TO_BOOL';
 	
-	/*
+	/**
 	 * Use this constant to define the model's database table
 	 */
 	const TABLE = __CLASS__;
 	
-	/*
+	/**
 	 * The underlying array of model data
+	 * @var array
 	 */
 	protected $_data = [];
 	
-	/*
+	/**
 	 * Define as true if model should not be deleted from database.
+	 * @var bool
 	 */
 	protected $useSoftDeletes = FALSE;
 	
-	/*
+	/**
 	 * Define with name of soft-delete field in database
 	 * if $this->useSoftDeletes === TRUE
+	 * @var string
 	 */
 	protected $softDeleteFieldName = 'deleted';
 	
-	/*
+	/**
 	 * Define with name of createdAt timestamp field
+	 * @var string
 	 */
 	protected $timestampFieldName = 'created';
 	
-	/*
+	/**
 	 * If true, enforces the $timestampFieldName has a value when calling create()
+	 * @var bool
 	 */
 	protected $timestamp = TRUE;
 	
-	/*
+	/**
 	 * An associative array of properties with casting instructions,
 	 * the values of which are constants on the base class.
+	 * @var array
 	 */
 	protected $casts = [
 		'id' => self::CAST_TO_INT,
@@ -168,6 +178,11 @@ abstract class Model implements ModelInterface, IteratorAggregate, JsonSerializa
 		return empty( $this->getAll() );
 	}
 	
+	/**
+	 * Fetch the model fields from the database,
+	 * and remove all props on the model not in those fields.
+	 * @return Model
+	 */
 	public function removePropsNotInDatabase()
 	{
 		$databaseProps = static::fetchDatabaseFields();
@@ -409,7 +424,7 @@ abstract class Model implements ModelInterface, IteratorAggregate, JsonSerializa
 	/**
 	 * Specify data which should be serialized to JSON
 	 * @link http://php.net/manual/en/jsonserializable.jsonserialize.php
-	 * @return mixed data which can be serialized by <b>json_encode</b>,
+	 * @return array data which can be serialized by <b>json_encode</b>,
 	 * which is a value of any type other than a resource.
 	 * @since 5.4.0
 	 */
@@ -418,6 +433,9 @@ abstract class Model implements ModelInterface, IteratorAggregate, JsonSerializa
 		return $this->getAll();
 	}
 	
+	/**
+	 * @return array
+	 */
 	public function toArray()
 	{
 		return $this->jsonSerialize();
@@ -470,6 +488,12 @@ abstract class Model implements ModelInterface, IteratorAggregate, JsonSerializa
 		return $this->toJson();
 	}
 	
+	/**
+	 * @param $prop
+	 * @param $value
+	 *
+	 * @throws DirectAccessException
+	 */
 	public function __set( $prop, $value )
 	{
 		$className = static::getNamespace();
@@ -479,6 +503,11 @@ abstract class Model implements ModelInterface, IteratorAggregate, JsonSerializa
 		);
 	}
 	
+	/**
+	 * @param $prop
+	 *
+	 * @throws DirectAccessException
+	 */
 	public function __get( $prop )
 	{
 		$className = static::getNamespace();

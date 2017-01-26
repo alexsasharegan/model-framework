@@ -8,6 +8,10 @@
 
 namespace Framework;
 
+/**
+ * Interface ModelInterface
+ * @package Framework
+ */
 interface ModelInterface {
 	
 	/**

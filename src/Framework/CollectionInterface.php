@@ -8,6 +8,10 @@
 
 namespace Framework;
 
+/**
+ * Interface CollectionInterface
+ * @package Framework
+ */
 interface CollectionInterface {
 	
 	/**

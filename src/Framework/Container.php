@@ -13,8 +13,15 @@ use Twig_Environment;
 use Twig_Extensions_Extension_Text;
 use Twig_Loader_Filesystem;
 
+/**
+ * Class Container
+ * @package Framework
+ */
 class Container implements ContainerInterface {
 	
+	/**
+	 * @var MySQL
+	 */
 	protected static $mySQL;
 	
 	/**

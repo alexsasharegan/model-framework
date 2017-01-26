@@ -11,6 +11,10 @@ namespace Framework;
 use Database\MySQL;
 use Twig_Environment;
 
+/**
+ * Interface ContainerInterface
+ * @package Framework
+ */
 interface ContainerInterface {
 	
 	/**
