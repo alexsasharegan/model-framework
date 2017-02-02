@@ -13,7 +13,6 @@ use Database\MySQL;
 use Framework\Exceptions\DirectAccessException;
 use IteratorAggregate;
 use JsonSerializable;
-use Traversable;
 
 /**
  * Class Model
@@ -90,48 +89,7 @@ abstract class Model implements ModelInterface, IteratorAggregate, JsonSerializa
 	}
 	
 	/**
-	 * Get a property by name.
-	 *
-	 * @param $prop
-	 *
-	 * @return mixed
-	 */
-	public function get( $prop )
-	{
-		return isset( $this->_data[ $prop ] ) ? $this->_data[ $prop ] : NULL;
-	}
-	
-	/**
-	 * Get all the object data as an associative array.
-	 *
-	 * @return mixed
-	 */
-	public function getAll()
-	{
-		return $this->_data;
-	}
-	
-	/**
-	 * Set a property by name.
-	 *
-	 * @param $prop
-	 * @param $value
-	 *
-	 * @return static
-	 */
-	public function set( $prop, $value )
-	{
-		$this->_data[ $prop ] = $this->parse( $prop, $value );
-		
-		return $this;
-	}
-	
-	/**
-	 * Initialize all the data on the model.
-	 *
-	 * @param array $data
-	 *
-	 * @return static
+	 * @inheritdoc
 	 */
 	public function setAll( array $data = [] )
 	{
@@ -143,108 +101,17 @@ abstract class Model implements ModelInterface, IteratorAggregate, JsonSerializa
 	}
 	
 	/**
-	 * @param $prop
-	 *
-	 * @return static
+	 * @inheritdoc
 	 */
-	public function remove( $prop )
+	public function set( $prop, $value )
 	{
-		unset( $this->_data[ $prop ] );
+		$this->_data[ $prop ] = $this->parse( $prop, $value );
 		
 		return $this;
 	}
 	
 	/**
-	 * Set an array of data on the model merging it with existing attributes.
-	 *
-	 * @param array $data
-	 *
-	 * @return static
-	 */
-	public function mergeData( array $data )
-	{
-		return $this->setAll(
-			array_merge( $this->getAll(), $data )
-		);
-	}
-	
-	/**
-	 * Returns whether or not any data is set on the model
-	 *
-	 * @return bool
-	 */
-	public function isEmpty()
-	{
-		return empty( $this->getAll() );
-	}
-	
-	/**
-	 * Fetch the model fields from the database,
-	 * and remove all props on the model not in those fields.
-	 * @return Model
-	 */
-	public function removePropsNotInDatabase()
-	{
-		$databaseProps = static::fetchDatabaseFields();
-		
-		return $this->setAll(
-			Collection::instance( $this->getAll() )->filter( function ( $value, $prop ) use ( $databaseProps )
-			{
-				return in_array( $prop, $databaseProps );
-			} )->toArray()
-		);
-	}
-	
-	/**
-	 * @return int
-	 */
-	public function count()
-	{
-		return count( $this->getAll() );
-	}
-	
-	/**
-	 * @param mixed $offset
-	 *
-	 * @return bool
-	 */
-	public function offsetExists( $offset )
-	{
-		return array_key_exists( $offset, $this->getAll() );
-	}
-	
-	/**
-	 * @param mixed $offset
-	 *
-	 * @return mixed
-	 */
-	public function offsetGet( $offset )
-	{
-		return $this->get( $offset );
-	}
-	
-	/**
-	 * @param mixed $offset
-	 * @param mixed $value
-	 */
-	public function offsetSet( $offset, $value )
-	{
-		$this->set( $offset, $value );
-	}
-	
-	/**
-	 * @param mixed $offset
-	 */
-	public function offsetUnset( $offset )
-	{
-		$this->remove( $offset );
-	}
-	
-	/**
-	 * @param $prop
-	 * @param $value
-	 *
-	 * @return mixed
+	 * @inheritdoc
 	 */
 	public function parse( $prop, $value )
 	{
@@ -276,10 +143,7 @@ abstract class Model implements ModelInterface, IteratorAggregate, JsonSerializa
 	}
 	
 	/**
-	 * @param      $json
-	 * @param bool $parseAsArray
-	 *
-	 * @return array|object
+	 * @inheritdoc
 	 */
 	public function parseJSON( $json, $parseAsArray = TRUE )
 	{
@@ -306,9 +170,7 @@ abstract class Model implements ModelInterface, IteratorAggregate, JsonSerializa
 	}
 	
 	/**
-	 * @param $boolean
-	 *
-	 * @return bool
+	 * @inheritdoc
 	 */
 	public function parseBool( $boolean )
 	{
@@ -316,19 +178,7 @@ abstract class Model implements ModelInterface, IteratorAggregate, JsonSerializa
 	}
 	
 	/**
-	 * @param $int
-	 *
-	 * @return int
-	 */
-	public function parseInt( $int )
-	{
-		return (int) $int;
-	}
-	
-	/**
-	 * @param $float
-	 *
-	 * @return float
+	 * @inheritdoc
 	 */
 	public function parseFloat( $float )
 	{
@@ -336,9 +186,7 @@ abstract class Model implements ModelInterface, IteratorAggregate, JsonSerializa
 	}
 	
 	/**
-	 * @param $price
-	 *
-	 * @return float
+	 * @inheritdoc
 	 */
 	public function parsePrice( $price )
 	{
@@ -346,11 +194,209 @@ abstract class Model implements ModelInterface, IteratorAggregate, JsonSerializa
 	}
 	
 	/**
-	 * Inserts the model in the database and returns the insert id.
-	 * Should also check for the static::CREATED_AT field's presence,
-	 * and timestamp a value if not present.
+	 * @inheritdoc
+	 */
+	public function parseInt( $int )
+	{
+		return (int) $int;
+	}
+	
+	/**
+	 * @inheritdoc
+	 */
+	public static function fetch( $id )
+	{
+		$instance = static::instance();
+		
+		Container::db()
+		         ->select( static::TABLE, (int) $id )
+		         ->iterateResult( function ( array $modelData ) use ( $instance )
+		         {
+			         $instance->setAll( $modelData );
+		         } );
+		
+		return $instance;
+	}
+	
+	/**
+	 * @inheritdoc
+	 */
+	public static function instance( array $data = [] )
+	{
+		return new static( $data );
+	}
+	
+	/**
+	 * @inheritdoc
+	 */
+	public static function fetchWhere( $whereClause )
+	{
+		$instance = static::instance();
+		
+		Container::db()
+		         ->select( static::TABLE, [ '*' ], "{$whereClause} LIMIT 1" )
+		         ->iterateResult( function ( array $modelData ) use ( $instance )
+		         {
+			         $instance->setAll( $modelData );
+		         } );
+		
+		return $instance;
+	}
+	
+	/**
+	 * @inheritdoc
+	 */
+	public static function fetchMany( $whereClause = '' )
+	{
+		return
+			Collection::instance(
+				Container::db()
+				         ->select( static::TABLE, [ '*' ], $whereClause )
+				         ->mapResult( function ( array $modelData )
+				         {
+					         return static::instance( $modelData );
+				         } )
+			);
+	}
+	
+	/**
+	 * @inheritdoc
+	 */
+	public function mergeData( array $data )
+	{
+		return $this->setAll(
+			array_merge( $this->getAll(), $data )
+		);
+	}
+	
+	/**
+	 * @inheritdoc
+	 */
+	public function getAll()
+	{
+		return $this->_data;
+	}
+	
+	/**
+	 * @inheritdoc
+	 */
+	public function isEmpty()
+	{
+		return empty( $this->getAll() );
+	}
+	
+	/**
+	 * @inheritdoc
+	 */
+	public function isNew()
+	{
+		return ! $this->get( 'id' );
+	}
+	
+	/**
+	 * @inheritdoc
+	 */
+	public function get( $prop )
+	{
+		return isset( $this->_data[ $prop ] ) ? $this->_data[ $prop ] : NULL;
+	}
+	
+	/**
+	 * Fetch the model fields from the database,
+	 * and remove all props on the model not in those fields.
+	 * @return Model
+	 */
+	public function removePropsNotInDatabase()
+	{
+		$databaseProps = static::fetchDatabaseFields();
+		
+		return $this->setAll(
+			Collection::instance( $this->getAll() )->filter( function ( $value, $prop ) use ( $databaseProps )
+			{
+				return in_array( $prop, $databaseProps );
+			} )->toArray()
+		);
+	}
+	
+	/**
+	 * Returns an array of field names from the connected database.
 	 *
-	 * @return int
+	 * @return array
+	 */
+	public static function fetchDatabaseFields()
+	{
+		return Container::db()->getColumns( static::TABLE );
+	}
+	
+	/**
+	 * @inheritdoc
+	 */
+	public function count()
+	{
+		return count( $this->getAll() );
+	}
+	
+	/**
+	 * @inheritdoc
+	 */
+	public function offsetExists( $offset )
+	{
+		return array_key_exists( $offset, $this->getAll() );
+	}
+	
+	/**
+	 * @inheritdoc
+	 */
+	public function offsetGet( $offset )
+	{
+		return $this->get( $offset );
+	}
+	
+	/**
+	 * @inheritdoc
+	 */
+	public function offsetSet( $offset, $value )
+	{
+		$this->set( $offset, $value );
+	}
+	
+	/**
+	 * @inheritdoc
+	 */
+	public function offsetUnset( $offset )
+	{
+		$this->remove( $offset );
+	}
+	
+	/**
+	 * @inheritdoc
+	 */
+	public function remove( $prop )
+	{
+		unset( $this->_data[ $prop ] );
+		
+		return $this;
+	}
+	
+	/**
+	 * @inheritdoc
+	 */
+	public function save()
+	{
+		if ( $id = $this->parseInt( $this->get( 'id' ) ) )
+		{
+			Container::db()->update( static::TABLE, $this->getAll(), $id );
+			
+			return $id;
+		}
+		else
+		{
+			return $this->create();
+		}
+	}
+	
+	/**
+	 * @inheritdoc
 	 */
 	public function create()
 	{
@@ -370,30 +416,7 @@ abstract class Model implements ModelInterface, IteratorAggregate, JsonSerializa
 	}
 	
 	/**
-	 * Intelligently inserts or updates the model based on
-	 * whether or not an id is present in the model data.
-	 *
-	 * @return int
-	 */
-	public function save()
-	{
-		if ( $id = $this->parseInt( $this->get( 'id' ) ) )
-		{
-			Container::db()->update( static::TABLE, $this->getAll(), $id );
-			
-			return $id;
-		}
-		else
-		{
-			return $this->create();
-		}
-	}
-	
-	/**
-	 * Delete a model from the database (requires id to be present).
-	 * If $useSoftDeletes is TRUE, updates the $softDeleteFieldName.
-	 *
-	 * @return bool|ModelInterface
+	 * @inheritdoc
 	 */
 	public function delete()
 	{
@@ -408,7 +431,7 @@ abstract class Model implements ModelInterface, IteratorAggregate, JsonSerializa
 	}
 	
 	/**
-	 * @return static
+	 * @inheritdoc
 	 */
 	public function softDelete()
 	{
@@ -422,19 +445,7 @@ abstract class Model implements ModelInterface, IteratorAggregate, JsonSerializa
 	}
 	
 	/**
-	 * Specify data which should be serialized to JSON
-	 * @link http://php.net/manual/en/jsonserializable.jsonserialize.php
-	 * @return array data which can be serialized by <b>json_encode</b>,
-	 * which is a value of any type other than a resource.
-	 * @since 5.4.0
-	 */
-	public function jsonSerialize()
-	{
-		return $this->getAll();
-	}
-	
-	/**
-	 * @return array
+	 * @inheritdoc
 	 */
 	public function toArray()
 	{
@@ -442,14 +453,11 @@ abstract class Model implements ModelInterface, IteratorAggregate, JsonSerializa
 	}
 	
 	/**
-	 * @param int $options
-	 * @param int $depth
-	 *
-	 * @return string
+	 * @inheritdoc
 	 */
-	public function toJson( $options = 0, $depth = 512 )
+	public function jsonSerialize()
 	{
-		return json_encode( $this, $options, $depth );
+		return $this->getAll();
 	}
 	
 	/**
@@ -463,17 +471,31 @@ abstract class Model implements ModelInterface, IteratorAggregate, JsonSerializa
 	/**
 	 * @return string
 	 */
+	public static function getNamespace()
+	{
+		return static::class;
+	}
+	
+	/**
+	 * @return string
+	 */
 	public function getFullyQualifiedClass()
 	{
 		return static::getFullyQualifiedNamespace();
 	}
 	
 	/**
-	 * Retrieve an external iterator
-	 * @link http://php.net/manual/en/iteratoraggregate.getiterator.php
-	 * @return Traversable An instance of an object implementing <b>Iterator</b> or
-	 * <b>Traversable</b>
-	 * @since 5.0.0
+	 * Gets the fully-qualified class name of the late-statically bound class
+	 *
+	 * @return string
+	 */
+	public static function getFullyQualifiedNamespace()
+	{
+		return substr( static::class, 0, 1 ) === '\\' ? static::class : '\\' . static::class;
+	}
+	
+	/**
+	 * @inheritdoc
 	 */
 	public function getIterator()
 	{
@@ -489,18 +511,11 @@ abstract class Model implements ModelInterface, IteratorAggregate, JsonSerializa
 	}
 	
 	/**
-	 * @param $prop
-	 * @param $value
-	 *
-	 * @throws DirectAccessException
+	 * @inheritdoc
 	 */
-	public function __set( $prop, $value )
+	public function toJson( $options = 0, $depth = 512 )
 	{
-		$className = static::getNamespace();
-		
-		throw new DirectAccessException(
-			"Cannot set property [{$prop} = {$value}] directly on {$className}. Use set method."
-		);
+		return json_encode( $this, $options, $depth );
 	}
 	
 	/**
@@ -518,103 +533,17 @@ abstract class Model implements ModelInterface, IteratorAggregate, JsonSerializa
 	}
 	
 	/**
-	 * @param array $data
+	 * @param $prop
+	 * @param $value
 	 *
-	 * @return static
+	 * @throws DirectAccessException
 	 */
-	public static function instance( array $data = [] )
+	public function __set( $prop, $value )
 	{
-		return new static( $data );
-	}
-	
-	/**
-	 * Returns an array of field names from the connected database.
-	 *
-	 * @return array
-	 */
-	public static function fetchDatabaseFields()
-	{
-		return Container::db()->getColumns( static::TABLE );
-	}
-	
-	/**
-	 * Fetch a model from the database by id.
-	 *
-	 * @param $id
-	 *
-	 * @return static
-	 */
-	public static function fetch( $id )
-	{
-		$instance = static::instance();
+		$className = static::getNamespace();
 		
-		Container::db()
-		         ->select( static::TABLE, (int) $id )
-		         ->iterateResult( function ( array $modelData ) use ( $instance )
-		         {
-			         $instance->setAll( $modelData );
-		         } );
-		
-		return $instance;
-	}
-	
-	/**
-	 * Fetch a model from the database using a where clause.
-	 * Method appends "LIMIT 1" to underlying query.
-	 *
-	 * @param $whereClause
-	 *
-	 * @return static
-	 */
-	public static function fetchWhere( $whereClause )
-	{
-		$instance = static::instance();
-		
-		Container::db()
-		         ->select( static::TABLE, [ '*' ], "{$whereClause} LIMIT 1" )
-		         ->iterateResult( function ( array $modelData ) use ( $instance )
-		         {
-			         $instance->setAll( $modelData );
-		         } );
-		
-		return $instance;
-	}
-	
-	/**
-	 * Fetches an array of models from the database using a supplied where clause.
-	 *
-	 * @param $whereClause
-	 *
-	 * @return CollectionInterface[static]
-	 */
-	public static function fetchMany( $whereClause = '' )
-	{
-		return
-			Collection::instance(
-				Container::db()
-				         ->select( static::TABLE, [ '*' ], $whereClause )
-				         ->mapResult( function ( array $modelData )
-				         {
-					         return static::instance( $modelData );
-				         } )
-			);
-	}
-	
-	/**
-	 * Gets the fully-qualified class name of the late-statically bound class
-	 *
-	 * @return string
-	 */
-	public static function getFullyQualifiedNamespace()
-	{
-		return substr( static::class, 0, 1 ) === '\\' ? static::class : '\\' . static::class;
-	}
-	
-	/**
-	 * @return string
-	 */
-	public static function getNamespace()
-	{
-		return static::class;
+		throw new DirectAccessException(
+			"Cannot set property [{$prop} = {$value}] directly on {$className}. Use set method."
+		);
 	}
 }

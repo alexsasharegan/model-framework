@@ -15,6 +15,39 @@ namespace Framework;
 interface ModelInterface {
 	
 	/**
+	 * Fetch a model from the database by id.
+	 *
+	 * @param $id
+	 *
+	 * @return ModelInterface
+	 */
+	public static function fetch( $id );
+	
+	/**
+	 * Fetch a model from the database using a where clause.
+	 * Method appends "LIMIT 1" to underlying query.
+	 *
+	 * @param $whereClause
+	 *
+	 * @return ModelInterface
+	 */
+	public static function fetchWhere( $whereClause );
+	
+	/**
+	 * Fetches a collection of models from the database using a supplied where clause.
+	 *
+	 * @param $whereClause
+	 *
+	 * @return ModelInterface[]
+	 */
+	public static function fetchMany( $whereClause );
+	
+	/**
+	 * @return ModelInterface
+	 */
+	public static function instance();
+	
+	/**
 	 * Get a property by name.
 	 *
 	 * @param $prop
@@ -75,6 +108,13 @@ interface ModelInterface {
 	public function isEmpty();
 	
 	/**
+	 * Returns true if the model does not have an id.
+	 *
+	 * @return bool
+	 */
+	public function isNew();
+	
+	/**
 	 * @param $prop
 	 * @param $value
 	 *
@@ -119,34 +159,6 @@ interface ModelInterface {
 	public function parsePrice( $price );
 	
 	/**
-	 * Fetch a model from the database by id.
-	 *
-	 * @param $id
-	 *
-	 * @return ModelInterface
-	 */
-	public static function fetch( $id );
-	
-	/**
-	 * Fetch a model from the database using a where clause.
-	 * Method appends "LIMIT 1" to underlying query.
-	 *
-	 * @param $whereClause
-	 *
-	 * @return ModelInterface
-	 */
-	public static function fetchWhere( $whereClause );
-	
-	/**
-	 * Fetches an array of models from the database using a supplied where clause.
-	 *
-	 * @param $whereClause
-	 *
-	 * @return ModelInterface[]
-	 */
-	public static function fetchMany( $whereClause );
-	
-	/**
 	 * Inserts the model in the database and returns the insert id.
 	 * Should also check for the static::CREATED_AT field's presence,
 	 * and timestamp a value if not present.
@@ -188,10 +200,5 @@ interface ModelInterface {
 	 * @return array
 	 */
 	public function toArray();
-	
-	/**
-	 * @return ModelInterface
-	 */
-	public static function instance();
 	
 }
