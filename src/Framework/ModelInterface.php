@@ -19,7 +19,7 @@ interface ModelInterface {
 	 *
 	 * @param $id
 	 *
-	 * @return ModelInterface
+	 * @return ModelInterface|static
 	 */
 	public static function fetch( $id );
 	
@@ -29,7 +29,7 @@ interface ModelInterface {
 	 *
 	 * @param $whereClause
 	 *
-	 * @return ModelInterface
+	 * @return ModelInterface|static
 	 */
 	public static function fetchWhere( $whereClause );
 	
@@ -38,12 +38,12 @@ interface ModelInterface {
 	 *
 	 * @param $whereClause
 	 *
-	 * @return ModelInterface[]
+	 * @return ModelInterface[]|static[]
 	 */
 	public static function fetchMany( $whereClause );
 	
 	/**
-	 * @return ModelInterface
+	 * @return ModelInterface|static
 	 */
 	public static function instance();
 	
@@ -69,7 +69,7 @@ interface ModelInterface {
 	 * @param $prop
 	 * @param $value
 	 *
-	 * @return ModelInterface
+	 * @return ModelInterface|static
 	 */
 	public function set( $prop, $value );
 	
@@ -78,7 +78,7 @@ interface ModelInterface {
 	 *
 	 * @param array $data
 	 *
-	 * @return ModelInterface
+	 * @return ModelInterface|static
 	 */
 	public function setAll( array $data = [] );
 	
@@ -87,7 +87,7 @@ interface ModelInterface {
 	 *
 	 * @param $prop
 	 *
-	 * @return ModelInterface
+	 * @return ModelInterface|static
 	 */
 	public function remove( $prop );
 	
@@ -96,7 +96,7 @@ interface ModelInterface {
 	 *
 	 * @param array $data
 	 *
-	 * @return ModelInterface
+	 * @return ModelInterface|static
 	 */
 	public function mergeData( array $data );
 	
@@ -184,7 +184,7 @@ interface ModelInterface {
 	public function delete();
 	
 	/**
-	 * @return ModelInterface
+	 * @return ModelInterface|static
 	 */
 	public function softDelete();
 	

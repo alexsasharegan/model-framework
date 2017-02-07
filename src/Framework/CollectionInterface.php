@@ -19,7 +19,7 @@ interface CollectionInterface {
 	 *
 	 * @param $item
 	 *
-	 * @return CollectionInterface
+	 * @return CollectionInterface|static
 	 */
 	public function add( $item );
 	
@@ -35,7 +35,7 @@ interface CollectionInterface {
 	 *
 	 * @param $item
 	 *
-	 * @return CollectionInterface
+	 * @return CollectionInterface|static
 	 */
 	public function append( $item );
 	
@@ -53,14 +53,14 @@ interface CollectionInterface {
 	 *
 	 * @param $collectionSize
 	 *
-	 * @return CollectionInterface
+	 * @return CollectionInterface|static
 	 */
 	public function chunk( $collectionSize );
 	
 	/**
 	 * The collapse method collapses a collection of arrays into a single, flat collection
 	 *
-	 * @return CollectionInterface
+	 * @return CollectionInterface|static
 	 */
 	public function collapse();
 	
@@ -78,7 +78,7 @@ interface CollectionInterface {
 	 * @param \Closure $f
 	 * @param bool     $passByReference
 	 *
-	 * @return CollectionInterface
+	 * @return CollectionInterface|static
 	 */
 	public function each( \Closure $f, $passByReference = FALSE );
 	
@@ -91,7 +91,7 @@ interface CollectionInterface {
 	 *
 	 * @param \Closure $f
 	 *
-	 * @return CollectionInterface
+	 * @return CollectionInterface|static
 	 */
 	public function filter( \Closure $f );
 	
@@ -111,7 +111,7 @@ interface CollectionInterface {
 	 * @param $pageNumber
 	 * @param $itemsPerPage
 	 *
-	 * @return CollectionInterface
+	 * @return CollectionInterface|static
 	 */
 	public function forPage( $pageNumber, $itemsPerPage );
 	
@@ -169,7 +169,7 @@ interface CollectionInterface {
 	 *
 	 * @param \Closure $f
 	 *
-	 * @return CollectionInterface
+	 * @return CollectionInterface|static
 	 */
 	public function map( \Closure $f );
 	
@@ -185,7 +185,7 @@ interface CollectionInterface {
 	 *
 	 * @param $item
 	 *
-	 * @return CollectionInterface
+	 * @return CollectionInterface|static
 	 */
 	public function prepend( $item );
 	
@@ -194,7 +194,7 @@ interface CollectionInterface {
 	 *
 	 * @param $item
 	 *
-	 * @return CollectionInterface
+	 * @return CollectionInterface|static
 	 */
 	public function push( $item );
 	
@@ -220,7 +220,7 @@ interface CollectionInterface {
 	 *
 	 * @param \Closure $f
 	 *
-	 * @return CollectionInterface
+	 * @return CollectionInterface|static
 	 */
 	public function reject( \Closure $f );
 	
@@ -229,14 +229,14 @@ interface CollectionInterface {
 	 *
 	 * @param $key
 	 *
-	 * @return CollectionInterface
+	 * @return CollectionInterface|static
 	 */
 	public function remove( $key );
 	
 	/**
 	 * The reverse method reverses the order of the collection's items
 	 *
-	 * @return CollectionInterface
+	 * @return CollectionInterface|static
 	 */
 	public function reverse();
 	
@@ -246,7 +246,7 @@ interface CollectionInterface {
 	 * @param $key
 	 * @param $value
 	 *
-	 * @return CollectionInterface
+	 * @return CollectionInterface|static
 	 */
 	public function set( $key, $value );
 	
@@ -263,7 +263,7 @@ interface CollectionInterface {
 	 * @param int $startIndex
 	 * @param     $length
 	 *
-	 * @return CollectionInterface
+	 * @return CollectionInterface|static
 	 */
 	public function slice( $startIndex = 0, $length );
 	
@@ -272,7 +272,7 @@ interface CollectionInterface {
 	 *
 	 * @param \Closure $f
 	 *
-	 * @return CollectionInterface
+	 * @return CollectionInterface|static
 	 */
 	public function sort( \Closure $f );
 	
@@ -283,7 +283,7 @@ interface CollectionInterface {
 	 * @param int|null   $length
 	 * @param array|null $replacement
 	 *
-	 * @return CollectionInterface
+	 * @return CollectionInterface|static
 	 */
 	public function splice( $spliceIndex, $length = NULL, $replacement = NULL );
 	
@@ -311,7 +311,7 @@ interface CollectionInterface {
 	 *
 	 * @param \Closure $f
 	 *
-	 * @return CollectionInterface
+	 * @return CollectionInterface|static
 	 */
 	public function where( \Closure $f );
 	
