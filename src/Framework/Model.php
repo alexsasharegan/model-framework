@@ -90,6 +90,7 @@ abstract class Model implements ModelInterface, IteratorAggregate, JsonSerializa
 	
 	/**
 	 * @inheritdoc
+	 * @return static
 	 */
 	public function setAll( array $data = [] )
 	{
@@ -102,6 +103,7 @@ abstract class Model implements ModelInterface, IteratorAggregate, JsonSerializa
 	
 	/**
 	 * @inheritdoc
+	 * @return static
 	 */
 	public function set( $prop, $value )
 	{
@@ -203,6 +205,7 @@ abstract class Model implements ModelInterface, IteratorAggregate, JsonSerializa
 	
 	/**
 	 * @inheritdoc
+	 * @return static
 	 */
 	public static function fetch( $id )
 	{
@@ -220,6 +223,7 @@ abstract class Model implements ModelInterface, IteratorAggregate, JsonSerializa
 	
 	/**
 	 * @inheritdoc
+	 * @return static
 	 */
 	public static function instance( array $data = [] )
 	{
@@ -228,6 +232,7 @@ abstract class Model implements ModelInterface, IteratorAggregate, JsonSerializa
 	
 	/**
 	 * @inheritdoc
+	 * @return static
 	 */
 	public static function fetchWhere( $whereClause )
 	{
@@ -245,6 +250,8 @@ abstract class Model implements ModelInterface, IteratorAggregate, JsonSerializa
 	
 	/**
 	 * @inheritdoc
+	 *
+	 * @return Collection[static]
 	 */
 	public static function fetchMany( $whereClause = '' )
 	{
@@ -261,6 +268,7 @@ abstract class Model implements ModelInterface, IteratorAggregate, JsonSerializa
 	
 	/**
 	 * @inheritdoc
+	 * @return static
 	 */
 	public function mergeData( array $data )
 	{
@@ -304,7 +312,7 @@ abstract class Model implements ModelInterface, IteratorAggregate, JsonSerializa
 	/**
 	 * Fetch the model fields from the database,
 	 * and remove all props on the model not in those fields.
-	 * @return Model
+	 * @return static
 	 */
 	public function removePropsNotInDatabase()
 	{
@@ -370,6 +378,7 @@ abstract class Model implements ModelInterface, IteratorAggregate, JsonSerializa
 	
 	/**
 	 * @inheritdoc
+	 * @return static
 	 */
 	public function remove( $prop )
 	{
@@ -383,15 +392,17 @@ abstract class Model implements ModelInterface, IteratorAggregate, JsonSerializa
 	 */
 	public function save()
 	{
-		if ( $id = $this->parseInt( $this->get( 'id' ) ) )
+		if ( $this->isNew() )
 		{
-			Container::db()->update( static::TABLE, $this->getAll(), $id );
-			
-			return $id;
+			return $this->create();
 		}
 		else
 		{
-			return $this->create();
+			$id = $this->parseInt( $this->get( 'id' ) );
+			
+			Container::db()->update( static::TABLE, $this->getAll(), $id );
+			
+			return $id;
 		}
 	}
 	
@@ -432,6 +443,7 @@ abstract class Model implements ModelInterface, IteratorAggregate, JsonSerializa
 	
 	/**
 	 * @inheritdoc
+	 * @return static
 	 */
 	public function softDelete()
 	{
