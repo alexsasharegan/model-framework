@@ -38,7 +38,7 @@ interface ModelInterface {
 	 *
 	 * @param $whereClause
 	 *
-	 * @return ModelInterface[]
+	 * @return Collection
 	 */
 	public static function fetchMany( $whereClause );
 	
