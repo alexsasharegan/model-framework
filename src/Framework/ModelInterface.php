@@ -189,6 +189,8 @@ interface ModelInterface {
 	public function softDelete();
 	
 	/**
+	 * Converts the internal model data array to json.
+	 *
 	 * @param int $options
 	 * @param int $depth
 	 *
@@ -197,8 +199,15 @@ interface ModelInterface {
 	public function toJson( $options = 0, $depth = 512 );
 	
 	/**
+	 * Converts the internal model data array to a plain array.
 	 * @return array
 	 */
 	public function toArray();
+	
+	/**
+	 * Converts the internal model data array to a collection.
+	 * @return Collection
+	 */
+	public function toCollection();
 	
 }

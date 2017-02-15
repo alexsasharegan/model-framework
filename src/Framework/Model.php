@@ -467,6 +467,22 @@ abstract class Model implements ModelInterface, IteratorAggregate, JsonSerializa
 	/**
 	 * @inheritdoc
 	 */
+	public function toJson( $options = 0, $depth = 512 )
+	{
+		return json_encode( $this, $options, $depth );
+	}
+	
+	/**
+	 * @inheritdoc
+	 */
+	public function toCollection()
+	{
+		return Collection::instance( $this->toArray() );
+	}
+	
+	/**
+	 * @inheritdoc
+	 */
 	public function jsonSerialize()
 	{
 		return $this->getAll();
@@ -520,14 +536,6 @@ abstract class Model implements ModelInterface, IteratorAggregate, JsonSerializa
 	public function __toString()
 	{
 		return $this->toJson();
-	}
-	
-	/**
-	 * @inheritdoc
-	 */
-	public function toJson( $options = 0, $depth = 512 )
-	{
-		return json_encode( $this, $options, $depth );
 	}
 	
 	/**
