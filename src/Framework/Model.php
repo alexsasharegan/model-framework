@@ -310,6 +310,28 @@ abstract class Model implements ModelInterface, IteratorAggregate, JsonSerializa
 	}
 	
 	/**
+	 * @param $dotNotationString
+	 *
+	 * @return array|mixed|null
+	 */
+	protected function getNested( $dotNotationString )
+	{
+		$indices      = explode( '.', $dotNotationString );
+		$movingTarget = $this->getAll();
+		
+		foreach ( $indices as $index )
+		{
+			$isArray = is_array( $movingTarget ) || $movingTarget instanceof ArrayAccess;
+			
+			if ( ! $isArray || ! isset( $movingTarget[ $index ] ) ) return NULL;
+			
+			$movingTarget = $movingTarget[ $index ];
+		}
+		
+		return $movingTarget;
+	}
+	
+	/**
 	 * Fetch the model fields from the database,
 	 * and remove all props on the model not in those fields.
 	 * @return static
