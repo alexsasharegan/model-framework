@@ -57,6 +57,17 @@ interface ModelInterface {
 	public function get( $prop );
 	
 	/**
+	 * <p>Safely attempt to access nested array or array access elements using dot notation.</p>
+	 * <p>Example: $model->getNested('customer.paymentInfo.ccToken') ==
+	 * $model['customer']['paymentInfo']['ccToken']</p>
+	 *
+	 * @param $dotNotationString
+	 *
+	 * @return array|mixed|null
+	 */
+	public function getNested( $dotNotationString );
+	
+	/**
 	 * Get all the object data as an associative array.
 	 *
 	 * @return array

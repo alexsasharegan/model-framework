@@ -377,7 +377,7 @@ class Collection implements CollectionInterface, \JsonSerializable, \ArrayAccess
 	/**
 	 * @inheritdoc
 	 */
-	public function map( \Closure $f )
+	public function map( \Closure $f, $returnAsArray = FALSE )
 	{
 		$mapped = static::instance();
 		
@@ -386,7 +386,7 @@ class Collection implements CollectionInterface, \JsonSerializable, \ArrayAccess
 			$mapped->set( $index, $f( $item, $index ) );
 		}
 		
-		return $mapped;
+		return $returnAsArray ? $mapped->toArray() : $mapped;
 	}
 	
 	/**

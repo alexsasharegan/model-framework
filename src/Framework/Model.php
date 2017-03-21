@@ -310,13 +310,11 @@ abstract class Model implements ModelInterface, IteratorAggregate, JsonSerializa
 	}
 	
 	/**
-	 * @param $dotNotationString
-	 *
-	 * @return array|mixed|null
+	 * @inheritdoc
 	 */
-	protected function getNested( $dotNotationString )
+	public function getNested( $dotNotationString )
 	{
-		$indices      = explode( '.', $dotNotationString );
+		$indices      = explode( '.', strval( $dotNotationString ) );
 		$movingTarget = $this->getAll();
 		
 		foreach ( $indices as $index )

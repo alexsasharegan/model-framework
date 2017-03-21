@@ -168,10 +168,11 @@ interface CollectionInterface {
 	 * thus forming a new collection of modified items
 	 *
 	 * @param \Closure $f
+	 * @param bool     $returnAsArray
 	 *
 	 * @return CollectionInterface|static
 	 */
-	public function map( \Closure $f );
+	public function map( \Closure $f, $returnAsArray = FALSE );
 	
 	/**
 	 * The pop method removes and returns the last item from the collection
