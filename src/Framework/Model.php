@@ -10,7 +10,6 @@ namespace Framework;
 
 use ArrayAccess;
 use Database\MySQL;
-use Framework\Exceptions\DirectAccessException;
 use IteratorAggregate;
 use JsonSerializable;
 
@@ -90,15 +89,38 @@ abstract class Model implements ModelInterface, IteratorAggregate, JsonSerializa
 	
 	/**
 	 * @inheritdoc
-	 * @return static
 	 */
-	public function setAll( array $data = [] )
+	public function get( $prop )
 	{
-		$this->_data = [];
+		return isset( $this->_data[ $prop ] ) ? $this->_data[ $prop ] : NULL;
+	}
+	
+	/**
+	 * @inheritdoc
+	 */
+	public function getNested( $dotNotationString )
+	{
+		$indices      = explode( '.', strval( $dotNotationString ) );
+		$movingTarget = $this->getAll();
 		
-		foreach ( $data as $prop => $value ) $this->set( $prop, $value );
+		foreach ( $indices as $index )
+		{
+			$isArray = is_array( $movingTarget ) || $movingTarget instanceof ArrayAccess;
+			
+			if ( ! $isArray || ! isset( $movingTarget[ $index ] ) ) return NULL;
+			
+			$movingTarget = $movingTarget[ $index ];
+		}
 		
-		return $this;
+		return $movingTarget;
+	}
+	
+	/**
+	 * @inheritdoc
+	 */
+	public function getAll()
+	{
+		return $this->_data;
 	}
 	
 	/**
@@ -110,6 +132,60 @@ abstract class Model implements ModelInterface, IteratorAggregate, JsonSerializa
 		$this->_data[ $prop ] = $this->parse( $prop, $value );
 		
 		return $this;
+	}
+	
+	/**
+	 * @inheritdoc
+	 * @return static
+	 */
+	public function setAll( array $data = [] )
+	{
+		$this->_data = [];
+		
+		foreach ( $data as $prop => $value ) $this->set( $prop, $value );
+		
+		return $this;
+	}
+	
+	public function setNested( $propString, $value )
+	{
+		$movingTarget = &$this->_data;
+		$keys         = explode( '.', strval( $propString ) );
+		$length       = count( $keys );
+		
+		foreach ( $keys as $i => $key )
+		{
+			$lastKey = $i === $length - 1;
+			$isset   = isset( $movingTarget[ $key ] );
+			
+			if ( $isset && ! $lastKey && ! is_array( $movingTarget[ $key ] ) )
+			{
+				throw new \InvalidArgumentException( sprintf(
+					"Attempted to set/access the property %s like an array, but is of type: %s",
+					$key,
+					gettype( $movingTarget[ $key ] )
+				) );
+			}
+			
+			if ( ! $isset || ! is_array( $movingTarget[ $key ] ) ) $movingTarget[ $key ] = [];
+			
+			$movingTarget = &$movingTarget[ $key ];
+		}
+		
+		$movingTarget = $value;
+		
+		return $this;
+	}
+	
+	/**
+	 * @inheritdoc
+	 * @return static
+	 */
+	public function mergeData( array $data )
+	{
+		return $this->setAll(
+			array_merge( $this->getAll(), $data )
+		);
 	}
 	
 	/**
@@ -205,88 +281,6 @@ abstract class Model implements ModelInterface, IteratorAggregate, JsonSerializa
 	
 	/**
 	 * @inheritdoc
-	 * @return static
-	 */
-	public static function fetch( $id )
-	{
-		$instance = static::instance();
-		
-		Container::db()
-		         ->select( static::TABLE, (int) $id )
-		         ->iterateResult( function ( array $modelData ) use ( $instance )
-		         {
-			         $instance->setAll( $modelData );
-		         } );
-		
-		return $instance;
-	}
-	
-	/**
-	 * @inheritdoc
-	 * @return static
-	 */
-	public static function instance( array $data = [] )
-	{
-		return new static( $data );
-	}
-	
-	/**
-	 * @inheritdoc
-	 * @return static
-	 */
-	public static function fetchWhere( $whereClause )
-	{
-		$instance = static::instance();
-		
-		Container::db()
-		         ->select( static::TABLE, [ '*' ], "{$whereClause} LIMIT 1" )
-		         ->iterateResult( function ( array $modelData ) use ( $instance )
-		         {
-			         $instance->setAll( $modelData );
-		         } );
-		
-		return $instance;
-	}
-	
-	/**
-	 * @inheritdoc
-	 *
-	 * @return Collection[static]
-	 */
-	public static function fetchMany( $whereClause = '' )
-	{
-		return
-			Collection::instance(
-				Container::db()
-				         ->select( static::TABLE, [ '*' ], $whereClause )
-				         ->mapResult( function ( array $modelData )
-				         {
-					         return static::instance( $modelData );
-				         } )
-			);
-	}
-	
-	/**
-	 * @inheritdoc
-	 * @return static
-	 */
-	public function mergeData( array $data )
-	{
-		return $this->setAll(
-			array_merge( $this->getAll(), $data )
-		);
-	}
-	
-	/**
-	 * @inheritdoc
-	 */
-	public function getAll()
-	{
-		return $this->_data;
-	}
-	
-	/**
-	 * @inheritdoc
 	 */
 	public function isEmpty()
 	{
@@ -299,34 +293,6 @@ abstract class Model implements ModelInterface, IteratorAggregate, JsonSerializa
 	public function isNew()
 	{
 		return ! $this->get( 'id' );
-	}
-	
-	/**
-	 * @inheritdoc
-	 */
-	public function get( $prop )
-	{
-		return isset( $this->_data[ $prop ] ) ? $this->_data[ $prop ] : NULL;
-	}
-	
-	/**
-	 * @inheritdoc
-	 */
-	public function getNested( $dotNotationString )
-	{
-		$indices      = explode( '.', strval( $dotNotationString ) );
-		$movingTarget = $this->getAll();
-		
-		foreach ( $indices as $index )
-		{
-			$isArray = is_array( $movingTarget ) || $movingTarget instanceof ArrayAccess;
-			
-			if ( ! $isArray || ! isset( $movingTarget[ $index ] ) ) return NULL;
-			
-			$movingTarget = $movingTarget[ $index ];
-		}
-		
-		return $movingTarget;
 	}
 	
 	/**
@@ -519,17 +485,109 @@ abstract class Model implements ModelInterface, IteratorAggregate, JsonSerializa
 	/**
 	 * @return string
 	 */
-	public static function getNamespace()
+	public function getFullyQualifiedClass()
 	{
-		return static::class;
+		return static::getFullyQualifiedNamespace();
 	}
 	
 	/**
 	 * @return string
 	 */
-	public function getFullyQualifiedClass()
+	public function __toString()
 	{
-		return static::getFullyQualifiedNamespace();
+		return $this->toJson();
+	}
+	
+	/**
+	 * @param $prop
+	 *
+	 * @return mixed|null
+	 */
+	public function __get( $prop )
+	{
+		return $this->get( $prop );
+	}
+	
+	/**
+	 * @param $prop
+	 * @param $value
+	 *
+	 * @return Model
+	 */
+	public function __set( $prop, $value )
+	{
+		return $this->set( $prop, $value );
+	}
+	
+	/**
+	 * @inheritdoc
+	 * @return static
+	 */
+	public static function instance( array $data = [] )
+	{
+		return new static( $data );
+	}
+	
+	/**
+	 * @inheritdoc
+	 * @return static
+	 */
+	public static function fetch( $id )
+	{
+		$instance = static::instance();
+		
+		Container::db()
+		         ->select( static::TABLE, (int) $id )
+		         ->iterateResult( function ( array $modelData ) use ( $instance )
+		         {
+			         $instance->setAll( $modelData );
+		         } );
+		
+		return $instance;
+	}
+	
+	/**
+	 * @inheritdoc
+	 * @return static
+	 */
+	public static function fetchWhere( $whereClause )
+	{
+		$instance = static::instance();
+		
+		Container::db()
+		         ->select( static::TABLE, [ '*' ], "{$whereClause} LIMIT 1" )
+		         ->iterateResult( function ( array $modelData ) use ( $instance )
+		         {
+			         $instance->setAll( $modelData );
+		         } );
+		
+		return $instance;
+	}
+	
+	/**
+	 * @inheritdoc
+	 *
+	 * @return Collection[static]
+	 */
+	public static function fetchMany( $whereClause = '' )
+	{
+		return
+			Collection::instance(
+				Container::db()
+				         ->select( static::TABLE, [ '*' ], $whereClause )
+				         ->mapResult( function ( array $modelData )
+				         {
+					         return static::instance( $modelData );
+				         } )
+			);
+	}
+	
+	/**
+	 * @return string
+	 */
+	public static function getNamespace()
+	{
+		return static::class;
 	}
 	
 	/**
@@ -548,42 +606,5 @@ abstract class Model implements ModelInterface, IteratorAggregate, JsonSerializa
 	public function getIterator()
 	{
 		return new \ArrayIterator( $this->_data );
-	}
-	
-	/**
-	 * @return string
-	 */
-	public function __toString()
-	{
-		return $this->toJson();
-	}
-	
-	/**
-	 * @param $prop
-	 *
-	 * @throws DirectAccessException
-	 */
-	public function __get( $prop )
-	{
-		$className = static::getNamespace();
-		
-		throw new DirectAccessException(
-			"Cannot access property [{$prop}] directly on {$className}. Use get method."
-		);
-	}
-	
-	/**
-	 * @param $prop
-	 * @param $value
-	 *
-	 * @throws DirectAccessException
-	 */
-	public function __set( $prop, $value )
-	{
-		$className = static::getNamespace();
-		
-		throw new DirectAccessException(
-			"Cannot set property [{$prop} = {$value}] directly on {$className}. Use set method."
-		);
 	}
 }
