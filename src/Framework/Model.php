@@ -189,6 +189,38 @@ abstract class Model implements ModelInterface, IteratorAggregate, JsonSerializa
 	}
 	
 	/**
+	 * @param bool $modelStateIsTruth
+	 *
+	 * @return $this
+	 * @throws \Exception
+	 */
+	public function reHydrate( $modelStateIsTruth = FALSE )
+	{
+		if ( $this->isNew() )
+		{
+			throw new \Exception( "Cannot re-hydrate a new model. No `id` property found!" );
+		}
+		
+		$id = $this->get( 'id' );
+		
+		Container::db()
+		         ->select( static::TABLE, (int) $id )
+		         ->iterateResult( function ( array $modelData ) use ( $modelStateIsTruth )
+		         {
+			         if ( $modelStateIsTruth )
+			         {
+				         $this->setAll( array_merge( $modelData, $this->getAll() ) );
+			         }
+			         else
+			         {
+				         $this->mergeData( $modelData );
+			         }
+		         } );
+		
+		return $this;
+	}
+	
+	/**
 	 * @inheritdoc
 	 */
 	public function parse( $prop, $value )
