@@ -145,20 +145,20 @@ class Collection implements CollectionInterface, \JsonSerializable, \ArrayAccess
 	/**
 	 * @inheritdoc
 	 */
-	public function each( \Closure $f, $passByReference = FALSE )
+	public function each( callable $f, $passByReference = FALSE )
 	{
 		if ( $passByReference )
 		{
 			foreach ( $this->all() as $index => &$item )
 			{
-				if ( $f( $item, $index ) === FALSE ) break;
+				if ( call_user_func( $f, $item, $index ) === FALSE ) break;
 			}
 		}
 		else
 		{
 			foreach ( $this->all() as $index => $item )
 			{
-				if ( $f( $item, $index ) === FALSE ) break;
+				if ( call_user_func( $f, $item, $index ) === FALSE ) break;
 			}
 		}
 		
@@ -168,13 +168,13 @@ class Collection implements CollectionInterface, \JsonSerializable, \ArrayAccess
 	/**
 	 * @inheritdoc
 	 */
-	public function filter( \Closure $f )
+	public function filter( callable $f )
 	{
 		$filtered = static::instance();
 		
 		foreach ( $this->all() as $index => $item )
 		{
-			if ( $f( $item, $index ) ) $filtered->set( $index, $item );
+			if ( call_user_func( $f, $item, $index ) ) $filtered->set( $index, $item );
 		}
 		
 		return $filtered;
@@ -232,11 +232,11 @@ class Collection implements CollectionInterface, \JsonSerializable, \ArrayAccess
 	/**
 	 * @inheritdoc
 	 */
-	public function includes( \Closure $f )
+	public function includes( callable $f )
 	{
 		foreach ( $this->all() as $index => $item )
 		{
-			if ( $f( $item, $index ) ) return TRUE;
+			if ( call_user_func( $f, $item, $index ) ) return TRUE;
 		}
 		
 		return FALSE;
@@ -273,11 +273,11 @@ class Collection implements CollectionInterface, \JsonSerializable, \ArrayAccess
 	/**
 	 * @inheritdoc
 	 */
-	public function reduce( \Closure $f, $carry = NULL )
+	public function reduce( callable $f, $carry = NULL )
 	{
 		foreach ( $this->all() as $index => $item )
 		{
-			$carry = $f( $carry, $item, $index );
+			$carry = call_user_func( $f, $carry, $item, $index );
 		}
 		
 		return $carry;
@@ -286,13 +286,13 @@ class Collection implements CollectionInterface, \JsonSerializable, \ArrayAccess
 	/**
 	 * @inheritdoc
 	 */
-	public function reject( \Closure $f )
+	public function reject( callable $f )
 	{
 		$rejected = static::instance();
 		
 		foreach ( $this->all() as $index => $item )
 		{
-			if ( ! $f( $item, $index ) ) $rejected->set( $index, $item );
+			if ( ! call_user_func( $f, $item, $index ) ) $rejected->set( $index, $item );
 		}
 		
 		return $rejected;
@@ -317,7 +317,7 @@ class Collection implements CollectionInterface, \JsonSerializable, \ArrayAccess
 	/**
 	 * @inheritdoc
 	 */
-	public function sort( \Closure $f )
+	public function sort( callable $f )
 	{
 		usort( $this->_data, $f );
 		
@@ -377,13 +377,14 @@ class Collection implements CollectionInterface, \JsonSerializable, \ArrayAccess
 	/**
 	 * @inheritdoc
 	 */
-	public function map( \Closure $f, $returnAsArray = FALSE )
+	public function map( callable $f, $returnAsArray = FALSE )
 	{
 		$mapped = static::instance();
 		
 		foreach ( $this->all() as $index => $item )
 		{
-			$mapped->set( $index, $f( $item, $index ) );
+			
+			$mapped->set( $index, call_user_func( $f, $item, $index ) );
 		}
 		
 		return $returnAsArray ? $mapped->toArray() : $mapped;
@@ -392,13 +393,13 @@ class Collection implements CollectionInterface, \JsonSerializable, \ArrayAccess
 	/**
 	 * @inheritdoc
 	 */
-	public function where( \Closure $f )
+	public function where( callable $f )
 	{
 		$newCollection = static::instance();
 		
 		foreach ( $this->all() as $index => $item )
 		{
-			if ( $f( $item, $index ) ) $newCollection->set( $index, $item );
+			if ( call_user_func( $f, $item, $index ) ) $newCollection->set( $index, $item );
 		}
 		
 		return $newCollection;
@@ -407,11 +408,11 @@ class Collection implements CollectionInterface, \JsonSerializable, \ArrayAccess
 	/**
 	 * @inheritdoc
 	 */
-	public function findWhere( \Closure $f )
+	public function findWhere( callable $f )
 	{
 		foreach ( $this->all() as $index => $item )
 		{
-			if ( $f( $item, $index ) ) return $item;
+			if ( call_user_func( $f, $item, $index ) ) return $item;
 		}
 		
 		return NULL;
