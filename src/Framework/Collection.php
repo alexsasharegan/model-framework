@@ -145,8 +145,10 @@ class Collection implements CollectionInterface, \JsonSerializable, \ArrayAccess
 	/**
 	 * @inheritdoc
 	 */
-	public function each( callable $f, $passByReference = FALSE )
+	public function each( $f, $passByReference = FALSE )
 	{
+		$this->isCallable( $f );
+		
 		if ( $passByReference )
 		{
 			foreach ( $this->all() as $index => &$item )
@@ -168,8 +170,9 @@ class Collection implements CollectionInterface, \JsonSerializable, \ArrayAccess
 	/**
 	 * @inheritdoc
 	 */
-	public function filter( callable $f )
+	public function filter( $f )
 	{
+		$this->isCallable( $f );
 		$filtered = static::instance();
 		
 		foreach ( $this->all() as $index => $item )
@@ -232,8 +235,10 @@ class Collection implements CollectionInterface, \JsonSerializable, \ArrayAccess
 	/**
 	 * @inheritdoc
 	 */
-	public function includes( callable $f )
+	public function includes( $f )
 	{
+		$this->isCallable( $f );
+		
 		foreach ( $this->all() as $index => $item )
 		{
 			if ( call_user_func( $f, $item, $index ) ) return TRUE;
@@ -273,8 +278,10 @@ class Collection implements CollectionInterface, \JsonSerializable, \ArrayAccess
 	/**
 	 * @inheritdoc
 	 */
-	public function reduce( callable $f, $carry = NULL )
+	public function reduce( $f, $carry = NULL )
 	{
+		$this->isCallable( $f );
+		
 		foreach ( $this->all() as $index => $item )
 		{
 			$carry = call_user_func( $f, $carry, $item, $index );
@@ -286,8 +293,9 @@ class Collection implements CollectionInterface, \JsonSerializable, \ArrayAccess
 	/**
 	 * @inheritdoc
 	 */
-	public function reject( callable $f )
+	public function reject( $f )
 	{
+		$this->isCallable( $f );
 		$rejected = static::instance();
 		
 		foreach ( $this->all() as $index => $item )
@@ -317,8 +325,9 @@ class Collection implements CollectionInterface, \JsonSerializable, \ArrayAccess
 	/**
 	 * @inheritdoc
 	 */
-	public function sort( callable $f )
+	public function sort( $f )
 	{
+		$this->isCallable( $f );
 		usort( $this->_data, $f );
 		
 		return $this;
@@ -377,13 +386,13 @@ class Collection implements CollectionInterface, \JsonSerializable, \ArrayAccess
 	/**
 	 * @inheritdoc
 	 */
-	public function map( callable $f, $returnAsArray = FALSE )
+	public function map( $f, $returnAsArray = FALSE )
 	{
+		$this->isCallable( $f );
 		$mapped = static::instance();
 		
 		foreach ( $this->all() as $index => $item )
 		{
-			
 			$mapped->set( $index, call_user_func( $f, $item, $index ) );
 		}
 		
@@ -393,8 +402,9 @@ class Collection implements CollectionInterface, \JsonSerializable, \ArrayAccess
 	/**
 	 * @inheritdoc
 	 */
-	public function where( callable $f )
+	public function where( $f )
 	{
+		$this->isCallable( $f );
 		$newCollection = static::instance();
 		
 		foreach ( $this->all() as $index => $item )
@@ -408,8 +418,10 @@ class Collection implements CollectionInterface, \JsonSerializable, \ArrayAccess
 	/**
 	 * @inheritdoc
 	 */
-	public function findWhere( callable $f )
+	public function findWhere( $f )
 	{
+		$this->isCallable( $f );
+		
 		foreach ( $this->all() as $index => $item )
 		{
 			if ( call_user_func( $f, $item, $index ) ) return $item;
@@ -529,5 +541,24 @@ class Collection implements CollectionInterface, \JsonSerializable, \ArrayAccess
 	public function implode( $separator )
 	{
 		return implode( $separator, $this->toArray() );
+	}
+	
+	/**
+	 * @param      $fn
+	 * @param bool $shouldThrow
+	 *
+	 * @return bool
+	 * @throws \InvalidArgumentException
+	 */
+	protected function isCallable( $fn, $shouldThrow = TRUE )
+	{
+		if ( ! is_callable( $fn ) && $shouldThrow )
+		{
+			throw new \InvalidArgumentException(
+				sprintf( "Expected a callable type, but received %s instead.", gettype( $fn ) )
+			);
+		}
+		
+		return TRUE;
 	}
 }

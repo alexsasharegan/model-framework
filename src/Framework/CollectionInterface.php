@@ -75,12 +75,12 @@ interface CollectionInterface {
 	 * The each method iterates over the items in the collection and passes each item to a callback.
 	 * Return FALSE to exit the loop.
 	 *
-	 * @param callable $f
-	 * @param bool     $passByReference
+	 * @param      $f
+	 * @param bool $passByReference
 	 *
 	 * @return CollectionInterface|static
 	 */
-	public function each( callable $f, $passByReference = FALSE );
+	public function each( $f, $passByReference = FALSE );
 	
 	/**
 	 * The filter method filters the collection using the given callback,
@@ -89,11 +89,11 @@ interface CollectionInterface {
 	 * If no callback is supplied,
 	 * all entries of the collection that are equivalent to false will be removed
 	 *
-	 * @param callable $f
+	 * @param  $f
 	 *
 	 * @return CollectionInterface|static
 	 */
-	public function filter( callable $f );
+	public function filter( $f );
 	
 	/**
 	 * Returns the first item in the underlying array.
@@ -128,11 +128,11 @@ interface CollectionInterface {
 	 * The includes method passes each item in the collection to a callback
 	 * and returns true at the first item that returns true from the callback, or false
 	 *
-	 * @param callable $f
+	 * @param  $f
 	 *
 	 * @return bool
 	 */
-	public function includes( callable $f );
+	public function includes( $f );
 	
 	/**
 	 * The isEmpty method returns true if the collection is empty; otherwise, false is returned
@@ -167,12 +167,12 @@ interface CollectionInterface {
 	 * The callback is free to modify the item and return it,
 	 * thus forming a new collection of modified items
 	 *
-	 * @param callable $f
-	 * @param bool              $returnAsArray
+	 * @param      $f
+	 * @param bool $returnAsArray
 	 *
 	 * @return CollectionInterface|static
 	 */
-	public function map( callable $f, $returnAsArray = FALSE );
+	public function map( $f, $returnAsArray = FALSE );
 	
 	/**
 	 * The pop method removes and returns the last item from the collection
@@ -206,12 +206,12 @@ interface CollectionInterface {
 	 * <p>The value for <code>$carry</code> on the first iteration is null;
 	 * however, you may specify its initial value by passing a second argument to reduce</p>
 	 *
-	 * @param callable $f
-	 * @param null     $carry
+	 * @param      $f
+	 * @param null $carry
 	 *
 	 * @return mixed
 	 */
-	public function reduce( callable $f, $carry = NULL );
+	public function reduce( $f, $carry = NULL );
 	
 	/**
 	 * The reject method filters the collection using the given callback.
@@ -219,11 +219,11 @@ interface CollectionInterface {
 	 *
 	 * (opposite of filter)
 	 *
-	 * @param callable $f
+	 * @param  $f
 	 *
 	 * @return CollectionInterface|static
 	 */
-	public function reject( callable $f );
+	public function reject( $f );
 	
 	/**
 	 * Removes an item from the collection at a given key
@@ -271,11 +271,11 @@ interface CollectionInterface {
 	/**
 	 * The sort method sorts the collection against the supplied callback.
 	 *
-	 * @param callable $f
+	 * @param  $f
 	 *
 	 * @return CollectionInterface|static
 	 */
-	public function sort( callable $f );
+	public function sort( $f );
 	
 	/**
 	 * The splice method removes a portion of the collection and replaces it with something else.
@@ -310,19 +310,19 @@ interface CollectionInterface {
 	/**
 	 * The where method returns a new collection of items that pass a given truth test
 	 *
-	 * @param callable $f
+	 * @param  $f
 	 *
 	 * @return CollectionInterface|static
 	 */
-	public function where( callable $f );
+	public function where( $f );
 	
 	/**
 	 * The findWhere method returns the first item that passes a given truth test, or NULL
 	 *
-	 * @param callable $f
+	 * @param  $f
 	 *
 	 * @return mixed
 	 */
-	public function findWhere( callable $f );
+	public function findWhere( $f );
 	
 }
