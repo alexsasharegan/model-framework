@@ -1,11 +1,14 @@
 {
 	"name": "alexsasharegan/model-framework",
-	"description": "Make getting started with data-driven apps easier by using some solid model classes and database abstractions",
+	"description": "Make getting started with data-driven apps easier by using some solid model classes and database abstractions.",
+	"keywords": [
+		"orm",
+		"pdo",
+		"oop"
+	],
 	"type": "library",
 	"require": {
-		"alexsasharegan/database": "^1.0",
 		"vlucas/phpdotenv": "^2.4",
-		"league/flysystem": "^1.0",
 		"twig/twig": "^1.28",
 		"twig/extensions": "^1.4",
 		"slim/pdo": "^1.10",
