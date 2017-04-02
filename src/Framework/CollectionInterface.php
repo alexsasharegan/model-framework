@@ -75,12 +75,12 @@ interface CollectionInterface {
 	 * The each method iterates over the items in the collection and passes each item to a callback.
 	 * Return FALSE to exit the loop.
 	 *
-	 * @param      $f
+	 * @param      $fn
 	 * @param bool $passByReference
 	 *
 	 * @return CollectionInterface|static
 	 */
-	public function each( $f, $passByReference = FALSE );
+	public function each( $fn, $passByReference = FALSE );
 	
 	/**
 	 * The filter method filters the collection using the given callback,
@@ -89,11 +89,11 @@ interface CollectionInterface {
 	 * If no callback is supplied,
 	 * all entries of the collection that are equivalent to false will be removed
 	 *
-	 * @param  $f
+	 * @param  $fn
 	 *
 	 * @return CollectionInterface|static
 	 */
-	public function filter( $f );
+	public function filter( $fn );
 	
 	/**
 	 * Returns the first item in the underlying array.
@@ -128,11 +128,11 @@ interface CollectionInterface {
 	 * The includes method passes each item in the collection to a callback
 	 * and returns true at the first item that returns true from the callback, or false
 	 *
-	 * @param  $f
+	 * @param  $fn
 	 *
 	 * @return bool
 	 */
-	public function includes( $f );
+	public function includes( $fn );
 	
 	/**
 	 * The isEmpty method returns true if the collection is empty; otherwise, false is returned
@@ -167,12 +167,12 @@ interface CollectionInterface {
 	 * The callback is free to modify the item and return it,
 	 * thus forming a new collection of modified items
 	 *
-	 * @param      $f
+	 * @param      $fn
 	 * @param bool $returnAsArray
 	 *
 	 * @return CollectionInterface|static
 	 */
-	public function map( $f, $returnAsArray = FALSE );
+	public function map( $fn, $returnAsArray = FALSE );
 	
 	/**
 	 * The pop method removes and returns the last item from the collection
@@ -206,12 +206,12 @@ interface CollectionInterface {
 	 * <p>The value for <code>$carry</code> on the first iteration is null;
 	 * however, you may specify its initial value by passing a second argument to reduce</p>
 	 *
-	 * @param      $f
+	 * @param      $fn
 	 * @param null $carry
 	 *
 	 * @return mixed
 	 */
-	public function reduce( $f, $carry = NULL );
+	public function reduce( $fn, $carry = NULL );
 	
 	/**
 	 * The reject method filters the collection using the given callback.
@@ -219,11 +219,11 @@ interface CollectionInterface {
 	 *
 	 * (opposite of filter)
 	 *
-	 * @param  $f
+	 * @param  $fn
 	 *
 	 * @return CollectionInterface|static
 	 */
-	public function reject( $f );
+	public function reject( $fn );
 	
 	/**
 	 * Removes an item from the collection at a given key

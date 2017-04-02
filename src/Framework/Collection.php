@@ -19,7 +19,7 @@ class Collection implements CollectionInterface, \JsonSerializable, \ArrayAccess
 	/**
 	 * @var array
 	 */
-	protected $_data = [];
+	private $data = [];
 	
 	/**
 	 * Collection constructor.
@@ -28,7 +28,7 @@ class Collection implements CollectionInterface, \JsonSerializable, \ArrayAccess
 	 */
 	public function __construct( array $data = [] )
 	{
-		$this->_data = $data;
+		$this->data = $data;
 	}
 	
 	/**
@@ -36,7 +36,7 @@ class Collection implements CollectionInterface, \JsonSerializable, \ArrayAccess
 	 */
 	public function append( $item )
 	{
-		array_push( $this->_data, $item );
+		array_push( $this->data, $item );
 		
 		return $this;
 	}
@@ -81,7 +81,7 @@ class Collection implements CollectionInterface, \JsonSerializable, \ArrayAccess
 	 */
 	public function count()
 	{
-		return count( $this->_data );
+		return count( $this->data );
 	}
 	
 	/**
@@ -89,7 +89,7 @@ class Collection implements CollectionInterface, \JsonSerializable, \ArrayAccess
 	 */
 	public function push( $item )
 	{
-		array_push( $this->_data, $item );
+		array_push( $this->data, $item );
 		
 		return $this;
 	}
@@ -101,7 +101,7 @@ class Collection implements CollectionInterface, \JsonSerializable, \ArrayAccess
 	{
 		settype( $index, 'integer' );
 		
-		return isset( $this->_data[ $index ] ) ? $this->_data[ $index ] : NULL;
+		return isset( $this->data[ $index ] ) ? $this->data[ $index ] : NULL;
 	}
 	
 	/**
@@ -109,7 +109,7 @@ class Collection implements CollectionInterface, \JsonSerializable, \ArrayAccess
 	 */
 	public function isEmpty()
 	{
-		return empty( $this->_data );
+		return empty( $this->data );
 	}
 	
 	/**
@@ -139,28 +139,28 @@ class Collection implements CollectionInterface, \JsonSerializable, \ArrayAccess
 	 */
 	public function all()
 	{
-		return $this->_data;
+		return $this->data;
 	}
 	
 	/**
 	 * @inheritdoc
 	 */
-	public function each( $f, $passByReference = FALSE )
+	public function each( $fn, $passByReference = FALSE )
 	{
-		$this->isCallable( $f );
+		$this->isCallable( $fn );
 		
 		if ( $passByReference )
 		{
 			foreach ( $this->all() as $index => &$item )
 			{
-				if ( call_user_func( $f, $item, $index ) === FALSE ) break;
+				if ( call_user_func( $fn, $item, $index ) === FALSE ) break;
 			}
 		}
 		else
 		{
 			foreach ( $this->all() as $index => $item )
 			{
-				if ( call_user_func( $f, $item, $index ) === FALSE ) break;
+				if ( call_user_func( $fn, $item, $index ) === FALSE ) break;
 			}
 		}
 		
@@ -170,14 +170,14 @@ class Collection implements CollectionInterface, \JsonSerializable, \ArrayAccess
 	/**
 	 * @inheritdoc
 	 */
-	public function filter( $f )
+	public function filter( $fn )
 	{
-		$this->isCallable( $f );
+		$this->isCallable( $fn );
 		$filtered = static::instance();
 		
 		foreach ( $this->all() as $index => $item )
 		{
-			if ( call_user_func( $f, $item, $index ) ) $filtered->set( $index, $item );
+			if ( call_user_func( $fn, $item, $index ) ) $filtered->set( $index, $item );
 		}
 		
 		return $filtered;
@@ -188,7 +188,7 @@ class Collection implements CollectionInterface, \JsonSerializable, \ArrayAccess
 	 */
 	public function set( $key, $value )
 	{
-		$this->_data[ $key ] = $value;
+		$this->data[ $key ] = $value;
 		
 		return $this;
 	}
@@ -235,13 +235,13 @@ class Collection implements CollectionInterface, \JsonSerializable, \ArrayAccess
 	/**
 	 * @inheritdoc
 	 */
-	public function includes( $f )
+	public function includes( $fn )
 	{
-		$this->isCallable( $f );
+		$this->isCallable( $fn );
 		
 		foreach ( $this->all() as $index => $item )
 		{
-			if ( call_user_func( $f, $item, $index ) ) return TRUE;
+			if ( call_user_func( $fn, $item, $index ) ) return TRUE;
 		}
 		
 		return FALSE;
@@ -262,7 +262,7 @@ class Collection implements CollectionInterface, \JsonSerializable, \ArrayAccess
 	 */
 	public function pop()
 	{
-		return array_pop( $this->_data );
+		return array_pop( $this->data );
 	}
 	
 	/**
@@ -270,7 +270,7 @@ class Collection implements CollectionInterface, \JsonSerializable, \ArrayAccess
 	 */
 	public function prepend( $item )
 	{
-		array_unshift( $this->_data, $item );
+		array_unshift( $this->data, $item );
 		
 		return $this;
 	}
@@ -278,13 +278,13 @@ class Collection implements CollectionInterface, \JsonSerializable, \ArrayAccess
 	/**
 	 * @inheritdoc
 	 */
-	public function reduce( $f, $carry = NULL )
+	public function reduce( $fn, $carry = NULL )
 	{
-		$this->isCallable( $f );
+		$this->isCallable( $fn );
 		
 		foreach ( $this->all() as $index => $item )
 		{
-			$carry = call_user_func( $f, $carry, $item, $index );
+			$carry = call_user_func( $fn, $carry, $item, $index );
 		}
 		
 		return $carry;
@@ -293,14 +293,14 @@ class Collection implements CollectionInterface, \JsonSerializable, \ArrayAccess
 	/**
 	 * @inheritdoc
 	 */
-	public function reject( $f )
+	public function reject( $fn )
 	{
-		$this->isCallable( $f );
+		$this->isCallable( $fn );
 		$rejected = static::instance();
 		
 		foreach ( $this->all() as $index => $item )
 		{
-			if ( ! call_user_func( $f, $item, $index ) ) $rejected->set( $index, $item );
+			if ( ! call_user_func( $fn, $item, $index ) ) $rejected->set( $index, $item );
 		}
 		
 		return $rejected;
@@ -319,7 +319,7 @@ class Collection implements CollectionInterface, \JsonSerializable, \ArrayAccess
 	 */
 	public function shift()
 	{
-		return array_shift( $this->_data );
+		return array_shift( $this->data );
 	}
 	
 	/**
@@ -328,7 +328,7 @@ class Collection implements CollectionInterface, \JsonSerializable, \ArrayAccess
 	public function sort( $f )
 	{
 		$this->isCallable( $f );
-		usort( $this->_data, $f );
+		usort( $this->data, $f );
 		
 		return $this;
 	}
@@ -386,14 +386,14 @@ class Collection implements CollectionInterface, \JsonSerializable, \ArrayAccess
 	/**
 	 * @inheritdoc
 	 */
-	public function map( $f, $returnAsArray = FALSE )
+	public function map( $fn, $returnAsArray = FALSE )
 	{
-		$this->isCallable( $f );
+		$this->isCallable( $fn );
 		$mapped = static::instance();
 		
 		foreach ( $this->all() as $index => $item )
 		{
-			$mapped->set( $index, call_user_func( $f, $item, $index ) );
+			$mapped->set( $index, call_user_func( $fn, $item, $index ) );
 		}
 		
 		return $returnAsArray ? $mapped->toArray() : $mapped;
@@ -435,7 +435,7 @@ class Collection implements CollectionInterface, \JsonSerializable, \ArrayAccess
 	 */
 	public function offsetExists( $offset )
 	{
-		return array_key_exists( $offset, $this->_data );
+		return array_key_exists( $offset, $this->data );
 	}
 	
 	/**
@@ -459,7 +459,7 @@ class Collection implements CollectionInterface, \JsonSerializable, \ArrayAccess
 	 */
 	public function get( $key )
 	{
-		return isset( $this->_data[ $key ] ) ? $this->_data[ $key ] : NULL;
+		return isset( $this->data[ $key ] ) ? $this->data[ $key ] : NULL;
 	}
 	
 	/**
@@ -502,7 +502,7 @@ class Collection implements CollectionInterface, \JsonSerializable, \ArrayAccess
 	 */
 	public function remove( $key )
 	{
-		unset( $this->_data[ $key ] );
+		unset( $this->data[ $key ] );
 		
 		return $this;
 	}
@@ -560,5 +560,40 @@ class Collection implements CollectionInterface, \JsonSerializable, \ArrayAccess
 		}
 		
 		return TRUE;
+	}
+	
+	/**
+	 * @param \PDOStatement $stmt
+	 * @param               $fn
+	 * @param null          $fetchStyle
+	 *
+	 * @return static
+	 */
+	public static function mapPDOStatement( \PDOStatement $stmt, $fn, $fetchStyle = NULL )
+	{
+		$mapped = new static();
+		
+		if ( is_null( $fn ) ) $fn = 'identity';
+		
+		while ( $row = $stmt->fetch( $fetchStyle ) ) $mapped->push( call_user_func( $fn, $row ) );
+		
+		return $mapped;
+	}
+	
+	/**
+	 * @param \PDOStatement $stmt
+	 * @param               $fn
+	 * @param null          $initial
+	 * @param null          $fetchStyle
+	 *
+	 * @return mixed|null
+	 */
+	public static function reducePDOStatement( \PDOStatement $stmt, $fn, $initial = NULL, $fetchStyle = NULL )
+	{
+		$carry = $initial;
+		
+		while ( $row = $stmt->fetch( $fetchStyle ) ) $carry = call_user_func( $fn, $carry, $row );
+		
+		return $carry;
 	}
 }

@@ -8,8 +8,9 @@
 
 namespace Framework;
 
-use Database\MySQL;
 use Exception;
+use PDO;
+use Slim\PDO\Database;
 use Twig_Environment;
 use Twig_Extensions_Extension_Text;
 use Twig_Loader_Filesystem;
@@ -20,65 +21,99 @@ use Twig_Loader_Filesystem;
  */
 class Container implements ContainerInterface {
 	
+	const DSN_FORMAT = 'mysql:host=%s;dbname=%s;port=%s;charset=%s';
 	/**
-	 * @var MySQL
+	 * @var array
 	 */
-	protected static $mySQL;
+	protected static $pdoOpts = [
+		PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
+		PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+		PDO::ATTR_EMULATE_PREPARES   => FALSE,
+		PDO::ATTR_STRINGIFY_FETCHES  => FALSE,
+	];
+	/**
+	 * @var Database
+	 */
+	protected static $dbInstance;
+	
+	public static $connectionParams = [];
+	
+	protected static $exceptionHandler = NULL;
 	
 	/**
-	 * @var callable
+	 * @return Database
 	 */
-	protected static $exceptionHandler;
+	public static function getDbInstance()
+	{
+		return self::$dbInstance;
+	}
+	
+	/**
+	 * @param Database $dbInstance
+	 */
+	public static function setDbInstance( Database $dbInstance )
+	{
+		self::$dbInstance = $dbInstance;
+	}
+	
+	public static function compileDSN( array $con )
+	{
+		return sprintf(
+			self::DSN_FORMAT,
+			$con['host'], $con['database'], $con['port'], $con['charset']
+		);
+	}
 	
 	/**
 	 * @param array $options
 	 * @param bool  $forceNewConnection
+	 * @param bool  $setOnContainer
 	 *
-	 * @return MySQL
+	 * @return null|Database
 	 * @throws Exception
 	 */
-	public static function db( $options = [], $forceNewConnection = FALSE )
+	public static function db( $options = [], $forceNewConnection = FALSE, $setOnContainer = TRUE )
 	{
+		$hasInstance = self::$dbInstance instanceof Database;
 		// return cached connection
-		if ( self::$mySQL instanceof MySQL && ! $forceNewConnection ) return self::$mySQL;
-		// force a new connection and close old connection via destructor
-		if ( self::$mySQL instanceof MySQL && $forceNewConnection ) self::$mySQL = NULL;
+		if ( $hasInstance && ! $forceNewConnection ) return self::getDbInstance();
+		// force a new connection and close old connection
+		if ( $hasInstance && $forceNewConnection && $setOnContainer ) self::$dbInstance = NULL;
 		
-		$defaults = [
+		$envParams = [
 			'host'     => getenv( 'DB_HOST' ),
 			'database' => getenv( 'DB_DATABASE' ),
-			'username' => getenv( 'DB_USERNAME' ),
-			'password' => getenv( 'DB_PASSWORD' ),
+			'port'     => getenv( 'DB_PORT' ),
+			'charset'  => getenv( 'DB_CHARSET' ),
+			'usr'      => getenv( 'DB_USERNAME' ),
+			'pwd'      => getenv( 'DB_PASSWORD' ),
 		];
+		
+		$params = array_merge( $envParams, $options );
+		if ( $setOnContainer ) self::$connectionParams = $params;
 		
 		try
 		{
-			self::$mySQL = new MySQL( NULL, array_merge( $defaults, $options ) );
+			$instance = new Database(
+				self::compileDSN( $params ), $params['usr'], $params['pwd'], self::$pdoOpts
+			);
+			if ( $setOnContainer ) self::setDbInstance( $instance );
+			
+			return $instance;
 		}
 		catch ( Exception $e )
 		{
-			is_callable( self::$exceptionHandler )
-				? call_user_func( self::$exceptionHandler, $e )
-				: self::reThrowException( $e );
+			if ( ! is_null( self::$exceptionHandler ) ) call_user_func( self::$exceptionHandler, $e );
+			else throw $e;
+			
+			return NULL;
 		}
-		
-		return self::$mySQL;
 	}
 	
 	/**
-	 * @param Exception $exception
-	 *
-	 * @throws Exception
+	 * @param  $fn
 	 */
-	protected static function reThrowException( Exception $exception )
-	{
-		throw $exception;
-	}
-	
-	/**
-	 * @param callable $fn
-	 */
-	public static function setExceptionHandler( callable $fn )
+	public static function setExceptionHandler( $fn )
 	{
 		self::$exceptionHandler = $fn;
 	}

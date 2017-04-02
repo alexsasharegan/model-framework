@@ -1,5 +1,5 @@
 # PHP Model Framework
----
+
 [![Latest Stable Version](https://poser.pugx.org/alexsasharegan/model-framework/v/stable)](https://packagist.org/packages/alexsasharegan/model-framework)
 [![Total Downloads](https://poser.pugx.org/alexsasharegan/model-framework/downloads)](https://packagist.org/packages/alexsasharegan/model-framework)
 [![Latest Unstable Version](https://poser.pugx.org/alexsasharegan/model-framework/v/unstable)](https://packagist.org/packages/alexsasharegan/model-framework)
@@ -16,10 +16,12 @@ composer require alexsasharegan/model-framework
 This library uses the `vlucas/phpdotenv` library to connect models to your database (_already included_).
 Start by creating a `.env` file with these database connection variables defined:
 ```bash
-DB_HOST="localhost"
-DB_DATABASE="sandbox"
-DB_USERNAME="system"
-DB_PASSWORD="system"
+DB_HOST=localhost
+DB_DATABASE=sandbox
+DB_PORT=3306
+DB_CHARSET=utf8
+DB_USERNAME=root
+DB_PASSWORD=root
 ```
 Now load the environment:
 ```php
@@ -27,8 +29,13 @@ Now load the environment:
 // in your main entry point file, load the environment
 // this technique avoids any global variable pollution
 call_user_func( function () {
-  $environment = new \Dotenv\Dotenv( __DIR__ );
-  $environment->load();
+	// constructed with the directory containing the `.env` file
+	$environment = new \Dotenv\Dotenv( __DIR__ );
+	$environment->load();
+  
+  // also a nice place to set things like timezone & session
+  date_default_timezone_set('America/Phoenix');
+  session_start();
 } );
 ```
 Now extend the abstract `\Framework\Model` class to get all the functionality:
@@ -105,23 +112,23 @@ $newCharacter->mergeData( [
 	'fakeField'  => "I'm not in your database...",
 ] );
 
-echo "\n";
+echo PHP_EOL;
 foreach ( $newCharacter as $key => $value )
 {
 	$type = gettype( $value );
-	echo "Prop: $key ($type): " . print_r( $value, TRUE ) . "\n";
+	echo "Prop: $key ($type): " . print_r( $value, TRUE ) . PHP_EOL;
 }
 
-echo "\n";
+echo PHP_EOL;
 // Retrieves the fields from the database,
 // then filters the properties on the object
 $newCharacter->removePropsNotInDatabase();
 foreach ( $newUser as $key => $value )
 {
 	$type = gettype( $value );
-	echo "Prop: $key ($type): " . print_r( $value, TRUE ) . "\n";
+	echo "Prop: $key ($type): " . print_r( $value, TRUE ) . PHP_EOL;
 }
-echo "\n";
+echo PHP_EOL;
 
 // Model::fetchMany returns a collection
 Character::fetchMany( "LIMIT 5" )
@@ -129,7 +136,7 @@ Character::fetchMany( "LIMIT 5" )
 		->forPage( 2, 3 )
 		->each( function ( Model $model, $index )
 		{
-			echo $model->get( 'id' ) . "\n";
+			echo $model->get( 'id' ) . PHP_EOL;
 		} )
 	    ->reverse()
 	    ->findWhere( function ( Model $model, $index )
@@ -137,3 +144,19 @@ Character::fetchMany( "LIMIT 5" )
 		    return ! empty( $model->get( 'password' ) );
 	    } );
 ```
+
+## Dependencies
+
+This library uses the following dependencies directly:
+
+- [vlucas/phpdotenv](https://github.com/vlucas/phpdotenv)
+	- environment variable declaration
+- [twig/twig](https://github.com/twigphp/Twig)
+	- template engine for container
+- [twig/extensions](https://github.com/twigphp/Twig-extensions)
+	- extra features for template engine
+- [slim/pdo](https://github.com/FaaPz/Slim-PDO)
+	- PDO extension classes for OOP queries
+	- Mostly implemented under the hood in the model classes
+- [nesbot/carbon](https://github.com/briannesbitt/Carbon)
+	- used for timestamping models
