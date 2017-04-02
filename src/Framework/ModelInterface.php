@@ -39,6 +39,13 @@ interface ModelInterface {
 	public static function fetchMany();
 	
 	/**
+	 * @param bool $asCollection
+	 *
+	 * @return array|Collection
+	 */
+	public static function fetchAll( $asCollection = TRUE );
+	
+	/**
 	 * @return ModelInterface
 	 */
 	public static function instance();

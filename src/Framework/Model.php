@@ -627,6 +627,20 @@ abstract class Model implements ModelInterface, IteratorAggregate, JsonSerializa
 	}
 	
 	/**
+	 * @inheritdoc
+	 */
+	public static function fetchAll( $asCollection = TRUE )
+	{
+		$all = Container::db()
+		                ->select()
+		                ->from( static::TABLE )
+		                ->execute()
+		                ->fetchAll( PDO::FETCH_CLASS, static::class );
+		
+		return $asCollection ? Collection::instance( $all ) : $all;
+	}
+	
+	/**
 	 * @return string
 	 */
 	public static function getNamespace()
