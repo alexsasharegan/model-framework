@@ -8,6 +8,8 @@
 
 namespace Framework;
 
+use Slim\PDO\Statement\SelectStatement;
+
 /**
  * Interface ModelInterface
  * @package Framework
@@ -24,23 +26,17 @@ interface ModelInterface {
 	public static function fetch( $id );
 	
 	/**
-	 * Fetch a model from the database using a where clause.
+	 * Fetch a model from the database.
 	 * Method appends "LIMIT 1" to underlying query.
 	 *
-	 * @param $whereClause
-	 *
-	 * @return ModelInterface
+	 * @return SelectStatement
 	 */
-	public static function fetchWhere( $whereClause );
+	public static function fetchWhere();
 	
 	/**
-	 * Fetches a collection of models from the database using a supplied where clause.
-	 *
-	 * @param $whereClause
-	 *
-	 * @return Collection
+	 * @return SelectStatement
 	 */
-	public static function fetchMany( $whereClause );
+	public static function fetchMany();
 	
 	/**
 	 * @return ModelInterface
