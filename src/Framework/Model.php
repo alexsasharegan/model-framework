@@ -591,18 +591,31 @@ abstract class Model implements ModelInterface, IteratorAggregate, JsonSerializa
 	}
 	
 	/**
+	 * @param \PDOStatement $statement
+	 *
+	 * @return \PDOStatement
+	 */
+	public static function setFetchModeClass( \PDOStatement $statement )
+	{
+		$statement->setFetchMode( PDO::FETCH_CLASS | PDO::FETCH_PROPS_LATE, static::class );
+		
+		return $statement;
+	}
+	
+	/**
 	 * @inheritdoc
 	 * @return static
 	 */
 	public static function fetch( $id )
 	{
-		return Container::db()
-		                ->select()
-		                ->from( static::TABLE )
-		                ->where( 'id', '=', (int) $id )
-		                ->limit( 1, 0 )
-		                ->execute()
-		                ->fetchObject( static::class );
+		$stmt = Container::db()
+		                 ->select()
+		                 ->from( static::TABLE )
+		                 ->where( 'id', '=', (int) $id )
+		                 ->limit( 1, 0 )
+		                 ->execute();
+		
+		return static::setFetchModeClass( $stmt )->fetch();
 	}
 	
 	/**
@@ -631,11 +644,12 @@ abstract class Model implements ModelInterface, IteratorAggregate, JsonSerializa
 	 */
 	public static function fetchAll( $asCollection = TRUE )
 	{
-		$all = Container::db()
-		                ->select()
-		                ->from( static::TABLE )
-		                ->execute()
-		                ->fetchAll( PDO::FETCH_CLASS, static::class );
+		$stmt = Container::db()
+		                 ->select()
+		                 ->from( static::TABLE )
+		                 ->execute();
+		
+		$all = static::setFetchModeClass( $stmt )->fetchAll();
 		
 		return $asCollection ? Collection::instance( $all ) : $all;
 	}
