@@ -494,6 +494,8 @@ abstract class Model implements ModelInterface, IteratorAggregate, JsonSerializa
 	 */
 	public function softDelete()
 	{
+		$this->set( $this->softDeleteFieldName, TRUE );
+		
 		Container::db()
 		         ->update( [ $this->softDeleteFieldName => TRUE ] )
 		         ->table( static::TABLE )
