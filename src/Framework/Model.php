@@ -219,7 +219,7 @@ abstract class Model implements ModelInterface, IteratorAggregate, JsonSerializa
 		                    ->select()
 		                    ->from( static::TABLE )
 		                    ->where( 'id', '=', $id )
-		                    ->limit( 1 )
+		                    ->limit( 1, 0 )
 		                    ->execute()
 		                    ->fetch( PDO::FETCH_ASSOC );
 		
