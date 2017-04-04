@@ -465,7 +465,6 @@ abstract class Model implements ModelInterface, IteratorAggregate, JsonSerializa
 			         ->update( $this->getPreparedData() )
 			         ->table( static::TABLE )
 			         ->where( 'id', '=', $id )
-			         ->limit( 1, 0 )
 			         ->execute();
 			
 			return $id;
