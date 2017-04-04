@@ -44,6 +44,11 @@ abstract class Model implements ModelInterface, IteratorAggregate, JsonSerializa
 	private $data = [];
 	
 	/**
+	 * @var array
+	 */
+	protected $defaults = [];
+	
+	/**
 	 * Define as true if model should not be deleted from database.
 	 * @var bool
 	 */
@@ -90,7 +95,7 @@ abstract class Model implements ModelInterface, IteratorAggregate, JsonSerializa
 		$this->casts = array_merge( [ 'id' => static::CAST_TO_INT, ], $this->casts );
 		
 		// Initialize the data on the model
-		$this->mergeData( $data );
+		$this->mergeData( $this->defaults, $data );
 	}
 	
 	/**
@@ -191,10 +196,10 @@ abstract class Model implements ModelInterface, IteratorAggregate, JsonSerializa
 	 * @inheritdoc
 	 * @return static
 	 */
-	public function mergeData( array $data )
+	public function mergeData( ...$data )
 	{
 		return $this->setAll(
-			array_merge( $this->getAll(), $data )
+			array_merge( $this->getAll(), ...$data )
 		);
 	}
 	
@@ -460,7 +465,8 @@ abstract class Model implements ModelInterface, IteratorAggregate, JsonSerializa
 			         ->update( $this->getPreparedData() )
 			         ->table( static::TABLE )
 			         ->where( 'id', '=', $id )
-			         ->limit( 1, 0 );
+			         ->limit( 1, 0 )
+			         ->execute();
 			
 			return $id;
 		}

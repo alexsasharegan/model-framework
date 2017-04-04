@@ -106,13 +106,13 @@ interface ModelInterface {
 	public function remove( $prop );
 	
 	/**
-	 * Set an array of data on the model merging it with existing attributes.
+	 * Set any number of associative arrays of data on the model merging it with existing attributes.
 	 *
 	 * @param array $data
 	 *
 	 * @return ModelInterface
 	 */
-	public function mergeData( array $data );
+	public function mergeData( ...$data );
 	
 	/**
 	 * Returns whether or not any data is set on the model
