@@ -426,6 +426,24 @@ abstract class Model implements ModelInterface, IteratorAggregate, JsonSerializa
 	}
 	
 	/**
+	 * @return array
+	 */
+	public function getPreparedData()
+	{
+		$data = $this->getAll();
+		
+		foreach ( $data as $key => $datum )
+		{
+			if ( is_object( $datum ) || is_array( $datum ) )
+			{
+				$data[ $key ] = json_encode( $datum );
+			}
+		}
+		
+		return $data;
+	}
+	
+	/**
 	 * @inheritdoc
 	 */
 	public function save()
@@ -439,7 +457,7 @@ abstract class Model implements ModelInterface, IteratorAggregate, JsonSerializa
 			$id = $this->parseInt( $this->get( 'id' ) );
 			
 			Container::db()
-			         ->update( $this->getAll() )
+			         ->update( $this->getPreparedData() )
 			         ->table( static::TABLE )
 			         ->where( 'id', '=', $id )
 			         ->limit( 1, 0 );
@@ -463,7 +481,7 @@ abstract class Model implements ModelInterface, IteratorAggregate, JsonSerializa
 		
 		// returns a string id
 		$id = Container::db()
-		               ->insert( $this->getAll() )
+		               ->insert( $this->getPreparedData() )
 		               ->into( static::TABLE )
 		               ->execute( TRUE );
 		// this will be parsed as an integer
@@ -482,7 +500,7 @@ abstract class Model implements ModelInterface, IteratorAggregate, JsonSerializa
 		return $this->parseBool(
 			Container::db()
 			         ->delete( static::TABLE )
-			         ->where( 'id', '=', $this->parseInt( $this->get( 'id' ) ) )
+			         ->where( 'id', '=', $this->get( 'id' ) )
 			         ->limit( 1, 0 )
 			         ->execute()
 		);
@@ -617,7 +635,9 @@ abstract class Model implements ModelInterface, IteratorAggregate, JsonSerializa
 		                 ->limit( 1, 0 )
 		                 ->execute();
 		
-		return static::setFetchModeClass( $stmt )->fetch();
+		$instance = static::setFetchModeClass( $stmt )->fetch();
+		
+		return $instance ?: static::instance();
 	}
 	
 	/**
@@ -652,6 +672,7 @@ abstract class Model implements ModelInterface, IteratorAggregate, JsonSerializa
 		                 ->execute();
 		
 		$all = static::setFetchModeClass( $stmt )->fetchAll();
+		$all = ! ! $all ? $all : [];
 		
 		return $asCollection ? Collection::instance( $all ) : $all;
 	}
