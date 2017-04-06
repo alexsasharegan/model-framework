@@ -44,6 +44,7 @@ abstract class Model implements ModelInterface, IteratorAggregate, JsonSerializa
 	private $data = [];
 	
 	/**
+	 * Fill with any default values for a new model.
 	 * @var array
 	 */
 	protected $defaults = [];
@@ -83,6 +84,32 @@ abstract class Model implements ModelInterface, IteratorAggregate, JsonSerializa
 	];
 	
 	/**
+	 * List of props to exclude when converting to an array
+	 * using the method Model::toWhiteListArray
+	 *
+	 * Used if Model::$whiteList is empty
+	 *
+	 * @var array
+	 */
+	protected $blackList = [];
+	
+	/**
+	 * List of props to include when converting to an array
+	 * using the method Model::toWhiteListArray
+	 *
+	 * Trumps Model::$blackList when not empty
+	 *
+	 * @var array
+	 */
+	protected $whiteList = [];
+	
+	/**
+	 * List of prop names to allow NULL when using Model::$casts
+	 * @var array
+	 */
+	protected $allowNull = [];
+	
+	/**
 	 * Model constructor.
 	 *
 	 * @param array $data
@@ -94,7 +121,7 @@ abstract class Model implements ModelInterface, IteratorAggregate, JsonSerializa
 		// but we'll leave this flexible to be overwritten in an extended class
 		$this->casts = array_merge( [ 'id' => static::CAST_TO_INT, ], $this->casts );
 		
-		// Initialize the data on the model
+		// Merge the data on the model with any defaults
 		$this->mergeData( $this->defaults, $data );
 	}
 	
@@ -240,7 +267,11 @@ abstract class Model implements ModelInterface, IteratorAggregate, JsonSerializa
 	 */
 	public function parse( $prop, $value )
 	{
-		if ( ! array_key_exists( $prop, $this->casts ) ) return $value;
+		$shouldCast = array_key_exists( $prop, $this->casts );
+		if ( ! $shouldCast ) return $value;
+		
+		$shouldAllowNull = in_array( $prop, $this->allowNull );
+		if ( is_null( $value ) && $shouldAllowNull ) return $value;
 		
 		switch ( $this->casts[ $prop ] )
 		{
@@ -539,6 +570,24 @@ abstract class Model implements ModelInterface, IteratorAggregate, JsonSerializa
 	public function toArray()
 	{
 		return $this->jsonSerialize();
+	}
+	
+	/**
+	 * @return array
+	 */
+	public function toWhiteListArray()
+	{
+		switch ( TRUE )
+		{
+			case empty( $this->whiteList ):
+				$rejectFn = function ( $value, $key ) { return in_array( $key, $this->blackList ); };
+				
+				return Collection::instance( $this->toArray() )->reject( $rejectFn )->toArray();
+			default:
+				$filterFn = function ( $value, $key ) { return in_array( $key, $this->whiteList ); };
+				
+				return Collection::instance( $this->toArray() )->filter( $filterFn )->toArray();
+		}
 	}
 	
 	/**
