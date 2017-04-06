@@ -443,6 +443,10 @@ abstract class Model implements ModelInterface, IteratorAggregate, JsonSerializa
 			{
 				$data[ $key ] = json_encode( $datum );
 			}
+			elseif ( is_bool( $datum ) )
+			{
+				$data[ $key ] = $this->parseInt( $datum );
+			}
 		}
 		
 		return $data;
