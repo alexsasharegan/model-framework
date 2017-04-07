@@ -263,15 +263,25 @@ abstract class Model implements ModelInterface, IteratorAggregate, JsonSerializa
 	}
 	
 	/**
+	 * @param $prop
+	 * @param $value
+	 *
+	 * @return bool
+	 */
+	public function shouldNotParse( $prop, $value )
+	{
+		if ( ! array_key_exists( $prop, $this->casts ) ) return TRUE;
+		if ( is_null( $value ) && in_array( $prop, $this->allowNull ) ) return TRUE;
+		
+		return FALSE;
+	}
+	
+	/**
 	 * @inheritdoc
 	 */
 	public function parse( $prop, $value )
 	{
-		$shouldCast = array_key_exists( $prop, $this->casts );
-		if ( ! $shouldCast ) return $value;
-		
-		$shouldAllowNull = in_array( $prop, $this->allowNull );
-		if ( is_null( $value ) && $shouldAllowNull ) return $value;
+		if ( $this->shouldNotParse( $prop, $value ) ) return $value;
 		
 		switch ( $this->casts[ $prop ] )
 		{
