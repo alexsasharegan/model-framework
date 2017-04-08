@@ -7,7 +7,7 @@
 
 A lightweight, PDO & MySQL-based data modeling framework in PHP strongly inspired by Laravel & Underscore/Lodash.
 
-## Show me the goods
+## Why Another Library
 
 This library has been developed in a production environment to alleviate the difficulties of working with PHP and MySQL. 
 
