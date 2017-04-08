@@ -5,7 +5,19 @@
 [![Latest Unstable Version](https://poser.pugx.org/alexsasharegan/model-framework/v/unstable)](https://packagist.org/packages/alexsasharegan/model-framework)
 [![License](https://poser.pugx.org/alexsasharegan/model-framework/license)](https://packagist.org/packages/alexsasharegan/model-framework)
 
-A lightweight, MySQL-based data modeling framework in PHP strongly inspired by Laravel & Underscore/Lodash.
+A lightweight, PDO & MySQL-based data modeling framework in PHP strongly inspired by Laravel & Underscore/Lodash.
+
+## Show me the goods
+
+This library has been developed in a production environment to alleviate the difficulties of working with PHP and MySQL. 
+
+Developing in the `[LMW]AMP` stack affords the benefits of a high availability of deployment environments. Unfortunately, this also means dealing with the quirks of an inconsistent PHP language API and poor MySQL data type translations to PHP.
+
+This is where the **model-framework** comes in. You can work with models & collections that provide a more consistent API wrapper around PHP, and define casts the work under the hood to enforce the type integrity of the data on your models.
+
+PDO is a great way to interact with MySQL in PHP while simultaneously reducing the potential for injection attacks. This library uses prepared queries under the hood to help you get started with PDO right out of the box. Use simple methods like `Model::removePropsNotInDatabase()` to query your object's table and strip out any fields not defined in your table.
+
+Not familiar with *Object-Oriented PHP*? The model class implements interfaces like **ArrayAccess** and **Traversable** so you can interact with it like a normal associative array, while still getting all the internal data type enforcement.
 
 ## Getting Started
 Using Composer, load up the library:
@@ -112,7 +124,12 @@ $newCharacter->mergeData( [
 	'fakeField'  => "I'm not in your database...",
 ] );
 
-echo PHP_EOL;
+
+// a handy dot notation syntax is available from the model as a __get magic method
+echo $newCharacter['special.house.name'];
+// Lanaster
+
+// The benefits of the Traversable interface
 foreach ( $newCharacter as $key => $value )
 {
 	$type = gettype( $value );
@@ -122,6 +139,8 @@ foreach ( $newCharacter as $key => $value )
 echo PHP_EOL;
 // Retrieves the fields from the database,
 // then filters the properties on the object
+// so you can further prevent injection
+// (prepared queries are also used for data binding)
 $newCharacter->removePropsNotInDatabase();
 foreach ( $newUser as $key => $value )
 {
@@ -130,19 +149,6 @@ foreach ( $newUser as $key => $value )
 }
 echo PHP_EOL;
 
-// Model::fetchMany returns a collection
-Character::fetchMany( "LIMIT 5" )
-	    ->prepend( Character::fetch( 655 ) )
-		->forPage( 2, 3 )
-		->each( function ( Model $model, $index )
-		{
-			echo $model->get( 'id' ) . PHP_EOL;
-		} )
-	    ->reverse()
-	    ->findWhere( function ( Model $model, $index )
-	    {
-		    return ! empty( $model->get( 'password' ) );
-	    } );
 ```
 
 ## Dependencies
