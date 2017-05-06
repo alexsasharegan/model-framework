@@ -551,7 +551,6 @@ abstract class Model implements ModelInterface, IteratorAggregate, JsonSerializa
 			Container::db()
 			         ->delete( static::TABLE )
 			         ->where( 'id', '=', $this->get( 'id' ) )
-			         ->limit( 1, 0 )
 			         ->execute()
 		);
 	}
@@ -567,7 +566,6 @@ abstract class Model implements ModelInterface, IteratorAggregate, JsonSerializa
 		Container::db()
 		         ->update( [ $this->softDeleteFieldName => TRUE ] )
 		         ->table( static::TABLE )
-		         ->limit( 1, 0 )
 		         ->where( 'id', '=', $this->parseInt( $this->get( 'id' ) ) )
 		         ->execute();
 		
