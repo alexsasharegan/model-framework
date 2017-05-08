@@ -2,8 +2,8 @@
 
 if ( ! function_exists( 'noop' ) )
 {
-	function noop()
-	{
-	
-	}
+    function noop()
+    {
+        
+    }
 }

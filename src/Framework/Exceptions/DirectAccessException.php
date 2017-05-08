@@ -9,5 +9,5 @@
 namespace Framework\Exceptions;
 
 class DirectAccessException extends \Exception {
-	
+    
 }

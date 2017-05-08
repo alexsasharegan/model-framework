@@ -16,18 +16,18 @@ use Twig_Environment;
  * @package Framework
  */
 interface ContainerInterface {
-	
-	/**
-	 * @param array $options
-	 *
-	 * @return MySQL
-	 */
-	public static function db( $options = [] );
-	
-	/**
-	 * @param string $templateLocation
-	 *
-	 * @return Twig_Environment
-	 */
-	public static function getTwigInstance( $templateLocation = __DIR__ );
+    
+    /**
+     * @param array $options
+     *
+     * @return MySQL
+     */
+    public static function db( $options = [] );
+    
+    /**
+     * @param string $templateLocation
+     *
+     * @return Twig_Environment
+     */
+    public static function getTwigInstance( $templateLocation = __DIR__ );
 }
