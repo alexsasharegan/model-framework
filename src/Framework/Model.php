@@ -545,14 +545,23 @@ abstract class Model implements ModelInterface, IteratorAggregate, JsonSerializa
 	 */
 	public function delete()
 	{
-		if ( $this->useSoftDeletes ) return $this->softDelete();
+		if ( $this->useSoftDeletes )
+		    return $this->softDelete();
 		
-		return $this->parseBool(
-			Container::db()
-			         ->delete( static::TABLE )
-			         ->where( 'id', '=', $this->get( 'id' ) )
-			         ->execute()
-		);
+		return $this->hardDelete();
+	}
+    
+    /**
+     * @return bool
+     */
+    public function hardDelete()
+    {
+        return $this->parseBool(
+            Container::db()
+                     ->delete( static::TABLE )
+                     ->where( 'id', '=', $this->get( 'id' ) )
+                     ->execute()
+        );
 	}
 	
 	/**
