@@ -11,6 +11,7 @@ namespace Framework;
 use ArrayAccess;
 use Carbon\Carbon;
 use Countable;
+use Framework\Interfaces\DBMarshalable;
 use IteratorAggregate;
 use JsonSerializable;
 use PDO;
@@ -19,7 +20,7 @@ use PDO;
  * Class Model
  * @package Framework
  */
-abstract class Model implements ModelInterface, IteratorAggregate, JsonSerializable, ArrayAccess, Countable {
+abstract class Model implements ModelInterface, IteratorAggregate, JsonSerializable, DBMarshalable, ArrayAccess, Countable {
 
   const CAST_FROM_JSON_TO_ARRAY = 'CAST_FROM_JSON_TO_ARRAY';
   const CAST_FROM_JSON_TO_OBJECT = 'CAST_FROM_JSON_TO_OBJECT';
@@ -508,7 +509,7 @@ abstract class Model implements ModelInterface, IteratorAggregate, JsonSerializa
       $id = $this->parseInt($this->get('id'));
 
       Container::db()
-               ->update($this->getPreparedData())
+               ->update($this->dbMarshal())
                ->table(static::TABLE)
                ->where('id', '=', $id)
                ->execute();
@@ -530,7 +531,7 @@ abstract class Model implements ModelInterface, IteratorAggregate, JsonSerializa
 
     // returns a string id
     $id = Container::db()
-                   ->insert($this->getPreparedData())
+                   ->insert($this->dbMarshal())
                    ->into(static::TABLE)
                    ->execute(TRUE);
     // this will be parsed as an integer
@@ -540,21 +541,39 @@ abstract class Model implements ModelInterface, IteratorAggregate, JsonSerializa
   }
 
   /**
-   * @return array
+   * @inheritdoc
    */
-  public function getPreparedData() {
-    $data = $this->getAll();
+  public function dbRaw() {
+    return $this->getAll();
+  }
 
-    foreach ($data as $key => $datum) {
-      if (is_object($datum) || is_array($datum)) {
-        $data[ $key ] = json_encode($datum);
-      }
-      elseif (is_bool($datum)) {
-        $data[ $key ] = $this->parseInt($datum);
-      }
+  /**
+   * @inheritdoc
+   */
+  public function dbMarshal() {
+    $ret = [];
+
+    foreach ($this->dbRaw() as $key => $value) {
+      list($k, $v) = $this->dbSerialize($key, $value);
+      $ret[ $k ] = $v;
     }
 
-    return $data;
+    return $ret;
+  }
+
+  /**
+   * @inheritdoc
+   */
+  public function dbSerialize($key, $value) {
+    switch (TRUE) {
+      case is_object($value):
+      case is_array($value):
+        return [$key, json_encode($value)];
+      case is_bool($value):
+        return [$key, $this->parseInt($value)];
+      default:
+        return [$key, $value];
+    }
   }
 
   /**
